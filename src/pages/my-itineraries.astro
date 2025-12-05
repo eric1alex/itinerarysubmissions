@@ -1,0 +1,171 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { db, Itinerary, eq } from "astro:db";
+import { getUserFromRequest } from "../lib/auth";
+
+// Check authentication
+const user = getUserFromRequest(Astro.request);
+
+if (!user) {
+    return Astro.redirect("/login");
+}
+
+// Load user's itineraries
+const itineraries = await db
+    .select()
+    .from(Itinerary)
+    .where(eq(Itinerary.userId, user.userId))
+    .orderBy(Itinerary.createdAt, "desc");
+
+const formatDate = (dateStr: string | Date) => {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+};
+---
+
+<Layout title="My Itineraries - Where In India">
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div class="flex flex-wrap justify-between items-start gap-4 mb-8">
+            <div class="flex flex-col gap-2">
+                <p
+                    class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]"
+                >
+                    My Itineraries
+                </p>
+                <p
+                    class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal"
+                >
+                    Logged in as {user.email}
+                </p>
+            </div>
+            <a
+                href="/submit"
+                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg shadow-sm hover:bg-primary/90 transition-colors"
+            >
+                <span class="material-symbols-outlined text-base">add</span>
+                <span>Create New</span>
+            </a>
+        </div>
+
+        {
+            itineraries.length === 0 ? (
+                <div class="flex flex-col items-center justify-center py-20 gap-4 bg-white dark:bg-gray-800/50 rounded-xl border border-border-light dark:border-border-dark">
+                    <span class="material-symbols-outlined text-6xl text-gray-400">
+                        map
+                    </span>
+                    <p class="text-gray-500 dark:text-gray-400 text-lg">
+                        You haven't created any itineraries yet
+                    </p>
+                    <a
+                        href="/submit"
+                        class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90"
+                    >
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Create Your First Itinerary</span>
+                    </a>
+                </div>
+            ) : (
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {itineraries.map((itinerary) => (
+                        <div class="group relative flex flex-col bg-white dark:bg-gray-800/50 border border-border-light dark:border-border-dark rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                            {itinerary.coverImage ? (
+                                <div
+                                    class="w-full bg-center bg-no-repeat aspect-video bg-cover"
+                                    style={`background-image: url("${itinerary.coverImage}");`}
+                                />
+                            ) : (
+                                <div class="w-full aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-6xl text-gray-400">
+                                        landscape
+                                    </span>
+                                </div>
+                            )}
+
+                            <div class="p-4 flex flex-col gap-3 flex-1">
+                                <a
+                                    href={`/itinerary/${itinerary.id}`}
+                                    class="hover:text-primary"
+                                >
+                                    <p class="text-text-light dark:text-text-dark text-base font-bold leading-normal">
+                                        {itinerary.title}
+                                    </p>
+                                </a>
+
+                                <div class="flex items-center gap-4 text-gray-500 dark:text-gray-400 text-sm">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-lg">
+                                            calendar_today
+                                        </span>
+                                        <span>{itinerary.duration}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-lg">
+                                            location_on
+                                        </span>
+                                        <span class="truncate">
+                                            {itinerary.location}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p class="text-xs text-gray-400">
+                                    Created {formatDate(itinerary.createdAt)}
+                                </p>
+
+                                <div class="flex gap-2 mt-auto pt-3 border-t border-border-light dark:border-border-dark">
+                                    <a
+                                        href={`/itinerary/${itinerary.id}`}
+                                        class="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                    >
+                                        <span class="material-symbols-outlined text-base">
+                                            visibility
+                                        </span>
+                                        <span>View</span>
+                                    </a>
+                                    <button
+                                        class="delete-btn flex items-center justify-center p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        data-id={itinerary.id}
+                                        data-title={itinerary.title}
+                                    >
+                                        <span class="material-symbols-outlined text-base">
+                                            delete
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )
+        }
+    </main>
+</Layout>
+
+<script>
+    // Handle delete buttons
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+            const button = e.currentTarget as HTMLElement;
+            const id = button.getAttribute("data-id");
+            const title = button.getAttribute("data-title");
+
+            if (!id) return;
+
+            const confirmed = confirm(
+                `Are you sure you want to delete "${title}"? This action cannot be undone.`,
+            );
+
+            if (!confirmed) return;
+
+            try {
+                // For now, just reload - we'll add delete endpoint later
+                alert("Delete functionality coming soon!");
+            } catch (error) {
+                alert("Failed to delete itinerary");
+            }
+        });
+    });
+</script>

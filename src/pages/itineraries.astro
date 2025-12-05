@@ -1,0 +1,240 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { db, Itinerary, User, eq } from "astro:db";
+
+// Load all published itineraries with author info
+const itinerariesData = await db
+    .select({
+        id: Itinerary.id,
+        title: Itinerary.title,
+        author: User.email,
+        coverImage: Itinerary.coverImage,
+        duration: Itinerary.duration,
+        transport: Itinerary.transport,
+        tags: Itinerary.tags,
+        createdAt: Itinerary.createdAt,
+    })
+    .from(Itinerary)
+    .innerJoin(User, eq(Itinerary.userId, User.id))
+    .where(eq(Itinerary.isPublished, true))
+    .orderBy(Itinerary.createdAt, "desc");
+
+const placeholderImage =
+    "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&h=600&fit=crop";
+---
+
+<Layout title="Explore Public Itineraries - Where In India">
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div class="flex flex-wrap justify-between items-start gap-4 mb-6">
+            <div class="flex flex-col gap-2">
+                <p
+                    class="text-text-light dark:text-text-dark text-4xl font-black leading-tight tracking-[-0.033em]"
+                >
+                    Explore Public Itineraries
+                </p>
+                <p
+                    class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal"
+                >
+                    Discover and get inspired by trips from our community.
+                </p>
+            </div>
+            <a
+                href="/submit"
+                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+            >
+                <span class="material-symbols-outlined text-base">add</span>
+                <span>Create New</span>
+            </a>
+        </div>
+
+        <div
+            class="px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-border-light dark:border-border-dark mb-6"
+        >
+            <label class="flex flex-col min-w-40 h-12 w-full">
+                <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+                    <div
+                        class="text-gray-500 dark:text-gray-400 flex bg-gray-100 dark:bg-gray-700 items-center justify-center pl-4 rounded-l-lg"
+                    >
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <input
+                        id="search-input"
+                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-gray-700 h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal"
+                        placeholder="Search by destination, city, or country"
+                    />
+                </div>
+            </label>
+        </div>
+
+        <div class="flex gap-3 px-4 flex-wrap mb-6">
+            <select
+                id="transport-filter"
+                class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-100 dark:bg-gray-700 pl-4 pr-2 text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-border-dark transition-colors border-0 cursor-pointer"
+            >
+                <option value="">All Transport</option>
+                <option value="Car">Car</option>
+                <option value="Train">Train</option>
+                <option value="Flight">Flight</option>
+                <option value="Boat">Boat</option>
+                <option value="Bus">Bus</option>
+            </select>
+
+            <select
+                id="sort-filter"
+                class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-100 dark:bg-gray-700 pl-4 pr-2 text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-border-dark transition-colors border-0 cursor-pointer"
+            >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+            </select>
+        </div>
+
+        {
+            itinerariesData.length === 0 ? (
+                <div class="flex flex-col items-center justify-center py-20 gap-4">
+                    <span class="material-symbols-outlined text-6xl text-gray-400">
+                        explore_off
+                    </span>
+                    <p class="text-gray-500 dark:text-gray-400 text-lg">
+                        No itineraries yet. Be the first to create one!
+                    </p>
+                    <a
+                        href="/submit"
+                        class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90"
+                    >
+                        <span class="material-symbols-outlined">add</span>
+                        <span>Create Itinerary</span>
+                    </a>
+                </div>
+            ) : (
+                <div
+                    id="itineraries-grid"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4"
+                >
+                    {itinerariesData.map((itinerary) => (
+                        <a
+                            href={`/itinerary/${itinerary.id}`}
+                            class="itinerary-card group flex flex-col gap-3 rounded-xl bg-white dark:bg-gray-800/50 border border-border-light dark:border-border-dark shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden cursor-pointer"
+                            data-id={itinerary.id}
+                            data-transport={itinerary.transport || ""}
+                            data-tags={JSON.stringify(itinerary.tags)}
+                            data-title={itinerary.title}
+                            data-created={itinerary.createdAt.toISOString()}
+                        >
+                            <div
+                                class="w-full bg-center bg-no-repeat aspect-video bg-cover"
+                                style={`background-image: url("${itinerary.coverImage || placeholderImage}");`}
+                            ></div>
+                            <div class="p-4 flex flex-col gap-3">
+                                <p class="text-text-light dark:text-text-dark text-base font-bold leading-normal">
+                                    {itinerary.title}
+                                </p>
+                                <div class="flex items-center gap-4 text-gray-500 dark:text-gray-400">
+                                    {itinerary.transport && (
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="material-symbols-outlined text-lg">
+                                                {itinerary.transport === "Car"
+                                                    ? "directions_car"
+                                                    : itinerary.transport ===
+                                                        "Train"
+                                                      ? "train"
+                                                      : itinerary.transport ===
+                                                          "Boat"
+                                                        ? "directions_boat"
+                                                        : itinerary.transport ===
+                                                            "Flight"
+                                                          ? "flight"
+                                                          : "directions_bus"}
+                                            </span>
+                                            <p class="text-sm font-normal">
+                                                {itinerary.transport}
+                                            </p>
+                                        </div>
+                                    )}
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-lg">
+                                            calendar_today
+                                        </span>
+                                        <p class="text-sm font-normal">
+                                            {itinerary.duration}
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+                                    By {itinerary.author.split("@")[0]}
+                                </p>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            )
+        }
+    </main>
+</Layout>
+
+<script>
+    // Filter and search functionality
+    function applyFilters(): void {
+        const searchInput =
+            (
+                document.getElementById("search-input") as HTMLInputElement
+            )?.value.toLowerCase() || "";
+        const transportFilter =
+            (document.getElementById("transport-filter") as HTMLSelectElement)
+                ?.value || "";
+        const sortFilter =
+            (document.getElementById("sort-filter") as HTMLSelectElement)
+                ?.value || "newest";
+
+        const cards = Array.from(
+            document.querySelectorAll(".itinerary-card"),
+        ) as HTMLElement[];
+
+        // Filter
+        cards.forEach((card) => {
+            const title = card.getAttribute("data-title")?.toLowerCase() || "";
+            const tags = card.getAttribute("data-tags")?.toLowerCase() || "";
+            const transport = card.getAttribute("data-transport") || "";
+
+            const matchesSearch =
+                title.includes(searchInput) || tags.includes(searchInput);
+            const matchesTransport =
+                !transportFilter || transport === transportFilter;
+
+            if (matchesSearch && matchesTransport) {
+                card.style.display = "flex";
+            } else {
+                card.style.display = "none";
+            }
+        });
+
+        // Sort visible cards
+        const visibleCards = cards.filter(
+            (card) => card.style.display !== "none",
+        );
+        visibleCards.sort((a, b) => {
+            const dateA = new Date(
+                a.getAttribute("data-created") || "",
+            ).getTime();
+            const dateB = new Date(
+                b.getAttribute("data-created") || "",
+            ).getTime();
+            return sortFilter === "newest" ? dateB - dateA : dateA - dateB;
+        });
+
+        const grid = document.getElementById("itineraries-grid");
+        if (grid) {
+            visibleCards.forEach((card) => grid.appendChild(card));
+        }
+    }
+
+    // Event listeners for filters
+    document
+        .getElementById("search-input")
+        ?.addEventListener("input", applyFilters);
+    document
+        .getElementById("transport-filter")
+        ?.addEventListener("change", applyFilters);
+    document
+        .getElementById("sort-filter")
+        ?.addEventListener("change", applyFilters);
+</script>

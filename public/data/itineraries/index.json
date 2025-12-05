@@ -1,0 +1,25 @@
+[
+  {
+    "id": "1764865511545-c3nesim",
+    "title": "Japan",
+    "author": "Eric",
+    "duration": "10",
+    "transport": "",
+    "tags": [],
+    "createdAt": "2025-12-04T16:25:11.545Z"
+  },
+  {
+    "id": "1733328000000-sample123",
+    "title": "10-Day Adventure in Kerala",
+    "author": "Alex Doe",
+    "coverImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuD58ZkI0fsWNEL2mrOGrjZlZxH7cU2XJdXQjkotnbFOoVFWpn7e-NZN-rTwoH6Ki120ArvxhEjI15totvHZiznKEojTQsWOyYGvqFLNoLCPOObwA_CDljgsE7r7-iTtEy7ynz7_AImZpjPI-hSXc5uGwPuzxGWbZM-knCiqHDT4OGMvvJ3nsa8YbpCLDlJnrId2Vrw810g4bx6yNGmOIo2QBIUlhdLkV3QsMWqU1g1tQcwNjglsGawzHVZ7FSTCrVM5Ua7GHdqGF4s",
+    "duration": "10 Days",
+    "transport": "Car",
+    "tags": [
+      "Nature",
+      "Backwaters",
+      "Culture"
+    ],
+    "createdAt": "2024-12-04T16:00:00.000Z"
+  }
+]

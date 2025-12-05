@@ -1,0 +1,344 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { db, Itinerary, User, eq } from "astro:db";
+import { getUserFromRequest } from "../../lib/auth";
+
+export const prerender = false;
+
+// Get the itinerary ID from the URL
+const { id } = Astro.params;
+
+// Get current user
+const currentUser = getUserFromRequest(Astro.request);
+
+// Load itinerary from database
+const itineraries = await db
+    .select({
+        itinerary: Itinerary,
+        authorEmail: User.email,
+    })
+    .from(Itinerary)
+    .innerJoin(User, eq(Itinerary.userId, User.id))
+    .where(eq(Itinerary.id, id || ""));
+
+if (itineraries.length === 0) {
+    return Astro.redirect("/itineraries");
+}
+
+const { itinerary, authorEmail } = itineraries[0];
+const isOwner = currentUser && currentUser.userId === itinerary.userId;
+
+const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+};
+---
+
+<Layout title={`${itinerary.title} - Where In India`}>
+    <main class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Itinerary Details -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- PageHeading -->
+                <div class="flex flex-wrap justify-between items-start gap-4">
+                    <div class="flex flex-col gap-2">
+                        <p
+                            class="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-text-light dark:text-text-dark"
+                        >
+                            {itinerary.title}
+                        </p>
+                        <p
+                            class="text-gray-500 dark:text-gray-400 text-base font-normal leading-normal"
+                        >
+                            By {authorEmail.split("@")[0]} | {
+                                formatDate(itinerary.startDate)
+                            } - {formatDate(itinerary.endDate)} | {
+                                itinerary.location
+                            }
+                        </p>
+                    </div>
+                    <div class="flex lg:hidden gap-2">
+                        <button
+                            id="download-btn-mobile"
+                            class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] gap-2"
+                        >
+                            <span class="material-symbols-outlined text-lg"
+                                >download</span
+                            >
+                            <span class="truncate">Download</span>
+                        </button>
+                        {
+                            isOwner && (
+                                <a
+                                    href={`/submit?id=${itinerary.id}`}
+                                    class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-white/10 text-text-light dark:text-text-dark text-sm font-bold leading-normal tracking-[0.015em]"
+                                >
+                                    <span class="truncate">Edit</span>
+                                </a>
+                            )
+                        }
+                    </div>
+                </div>
+
+                <!-- Trip Summary -->
+                <div>
+                    <p class="text-base text-gray-600 dark:text-gray-300">
+                        {itinerary.summary}
+                    </p>
+                </div>
+
+                <!-- Daily Breakdown Accordion -->
+                <div class="space-y-4">
+                    {
+                        itinerary.days.map((day: any, index: number) => (
+                            <div class="rounded-xl border border-border-light dark:border-border-dark bg-white dark:bg-background-dark/50">
+                                <details class="group p-4" open={index === 0}>
+                                    <summary class="flex cursor-pointer items-center justify-between gap-4">
+                                        <h3 class="text-lg font-bold text-text-light dark:text-text-dark">
+                                            Day {day.dayNumber}: {day.title}
+                                        </h3>
+                                        <span class="material-symbols-outlined transition-transform duration-300 group-open:rotate-180">
+                                            expand_more
+                                        </span>
+                                    </summary>
+                                    <div class="mt-4 space-y-4 text-gray-600 dark:text-gray-400">
+                                        {day.activities.map((activity: any) => (
+                                            <div class="p-4 rounded-lg bg-background-light dark:bg-background-dark">
+                                                <h4 class="font-bold text-text-light dark:text-text-dark">
+                                                    {activity.title}
+                                                </h4>
+                                                <p class="text-sm">
+                                                    {activity.description}
+                                                </p>
+                                                {(activity.time ||
+                                                    activity.address) && (
+                                                    <p class="text-sm mt-1 text-gray-500">
+                                                        {activity.time &&
+                                                            `Time: ${activity.time}`}
+                                                        {activity.time &&
+                                                            activity.address &&
+                                                            " | "}
+                                                        {activity.address &&
+                                                            `Address: ${activity.address}`}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
+
+            <!-- Right Column: Metadata & Actions -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="sticky top-24 space-y-6">
+                    <!-- Action Buttons -->
+                    <div
+                        class="hidden lg:block bg-white dark:bg-background-dark/50 p-4 rounded-xl border border-border-light dark:border-border-dark"
+                    >
+                        <div class="flex flex-col gap-3">
+                            <button
+                                id="download-btn"
+                                class="flex w-full min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white gap-2 text-sm font-bold leading-normal tracking-[0.015em]"
+                            >
+                                <span class="material-symbols-outlined text-xl"
+                                    >download</span
+                                >
+                                <span class="truncate">Download</span>
+                            </button>
+                            <button
+                                id="copy-btn"
+                                class="flex w-full min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-gray-200 dark:bg-white/10 text-text-light dark:text-text-dark text-sm font-bold leading-normal tracking-[0.015em]"
+                            >
+                                <span class="truncate">Copy Itinerary</span>
+                            </button>
+                            {
+                                isOwner && (
+                                    <a
+                                        href={`/submit?id=${itinerary.id}`}
+                                        class="flex w-full min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-transparent text-text-light dark:text-text-dark gap-2 text-sm font-bold leading-normal tracking-[0.015em]"
+                                    >
+                                        <span class="material-symbols-outlined text-xl">
+                                            edit
+                                        </span>
+                                        <span class="truncate">Edit</span>
+                                    </a>
+                                )
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Metadata Card -->
+                    <div
+                        class="bg-white dark:bg-background-dark/50 p-4 rounded-xl border border-border-light dark:border-border-dark"
+                    >
+                        <div class="grid grid-cols-1">
+                            <div
+                                class="grid grid-cols-2 py-4 border-b border-b-border-light dark:border-b-border-dark"
+                            >
+                                <p
+                                    class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal"
+                                >
+                                    Duration
+                                </p>
+                                <p
+                                    class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+                                >
+                                    {itinerary.duration}
+                                </p>
+                            </div>
+                            <div
+                                class="grid grid-cols-2 py-4 border-b border-b-border-light dark:border-b-border-dark"
+                            >
+                                <p
+                                    class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal"
+                                >
+                                    Trip Type
+                                </p>
+                                <p
+                                    class="text-text-light dark:text-text-dark text-sm font-medium leading-normal"
+                                >
+                                    {itinerary.tripType}
+                                </p>
+                            </div>
+                            {
+                                itinerary.budget && (
+                                    <div class="grid grid-cols-2 py-4 border-b border-b-border-light dark:border-b-border-dark">
+                                        <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+                                            Budget
+                                        </p>
+                                        <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">
+                                            {itinerary.budget}
+                                        </p>
+                                    </div>
+                                )
+                            }
+                            {
+                                itinerary.transport && (
+                                    <div class="grid grid-cols-2 py-4 border-b border-b-border-light dark:border-b-border-dark">
+                                        <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
+                                            Transport
+                                        </p>
+                                        <p class="text-text-light dark:text-text-dark text-sm font-medium leading-normal">
+                                            {itinerary.transport}
+                                        </p>
+                                    </div>
+                                )
+                            }
+                            <div class="grid grid-cols-2 py-4">
+                                <p
+                                    class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal"
+                                >
+                                    Tags
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    {
+                                        itinerary.tags.map(
+                                            (tag: string, index: number) => (
+                                                <span
+                                                    class={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                                        index === 0
+                                                            ? "bg-primary/20 text-primary"
+                                                            : index === 1
+                                                              ? "bg-secondary/20 text-secondary-800"
+                                                              : "bg-green-500/20 text-green-800"
+                                                    }`}
+                                                >
+                                                    {tag}
+                                                </span>
+                                            ),
+                                        )
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</Layout>
+
+<script define:vars={{ itineraryData: itinerary }}>
+    // Toast notification
+    function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        const colors = {
+            success: "bg-green-500",
+            error: "bg-red-500",
+            info: "bg-primary",
+        };
+
+        toast.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300`;
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    // Download JSON
+    function downloadJSON(data, filename) {
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+            type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    // Handle download button
+    function handleDownload() {
+        downloadJSON(
+            itineraryData,
+            `${itineraryData.title.replace(/\s+/g, "-")}.json`,
+        );
+        showToast("Download started!", "success");
+    }
+
+    // Handle copy button
+    async function handleCopy() {
+        let text = `${itineraryData.title}\n\nBy ${itineraryData.author}\n\n${itineraryData.summary}\n\n`;
+        itineraryData.days.forEach((day) => {
+            text += `Day ${day.dayNumber}: ${day.title}\n`;
+            day.activities.forEach((activity) => {
+                text += `  - ${activity.title}\n`;
+                if (activity.description) {
+                    text += `    ${activity.description}\n`;
+                }
+            });
+            text += "\n";
+        });
+        text += `\nView full itinerary: ${window.location.href}`;
+
+        try {
+            await navigator.clipboard.writeText(text);
+            showToast("Itinerary copied to clipboard!", "success");
+        } catch (error) {
+            showToast("Failed to copy", "error");
+        }
+    }
+
+    // Attach event listeners
+    document
+        .getElementById("download-btn")
+        ?.addEventListener("click", handleDownload);
+    document
+        .getElementById("download-btn-mobile")
+        ?.addEventListener("click", handleDownload);
+    document.getElementById("copy-btn")?.addEventListener("click", handleCopy);
+</script>

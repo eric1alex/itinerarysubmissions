@@ -1,0 +1,285 @@
+<!-- Verification Modal Component -->
+<div
+    id="verification-modal"
+    class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+>
+    <div
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8"
+    >
+        <!-- Step 1: Email Input -->
+        <div id="email-step" class="space-y-6">
+            <div class="text-center">
+                <span
+                    class="material-symbols-outlined text-5xl text-primary mb-4 block"
+                    >mail</span
+                >
+                <h2
+                    class="text-2xl font-bold text-gray-900 dark:text-white mb-2"
+                >
+                    Almost There!
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Enter your email to publish your itinerary
+                </p>
+            </div>
+
+            <div>
+                <label
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                    Email Address
+                </label>
+                <input
+                    type="email"
+                    id="verification-email"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="your@email.com"
+                />
+            </div>
+
+            <button
+                id="send-code-btn"
+                class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            >
+                Send Verification Code
+            </button>
+
+            <button
+                id="cancel-verification-btn"
+                class="w-full text-gray-600 dark:text-gray-400 py-2 hover:text-gray-900 dark:hover:text-white"
+            >
+                Cancel
+            </button>
+        </div>
+
+        <!-- Step 2: Code Verification -->
+        <div id="code-step" class="hidden space-y-6">
+            <div class="text-center">
+                <span
+                    class="material-symbols-outlined text-5xl text-primary mb-4 block"
+                    >lock</span
+                >
+                <h2
+                    class="text-2xl font-bold text-gray-900 dark:text-white mb-2"
+                >
+                    Enter Code
+                </h2>
+                <p class="text-gray-600 dark:text-gray-400">
+                    We sent a 4-digit code to <span
+                        id="display-email"
+                        class="font-semibold"></span>
+                </p>
+            </div>
+
+            <div>
+                <label
+                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                    Verification Code
+                </label>
+                <input
+                    type="text"
+                    id="verification-code"
+                    maxlength="4"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-center text-2xl font-bold tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="0000"
+                />
+            </div>
+
+            <button
+                id="verify-code-btn"
+                class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors"
+            >
+                Verify & Publish
+            </button>
+
+            <button
+                id="resend-code-btn"
+                class="w-full text-sm text-gray-600 dark:text-gray-400 py-2 hover:text-primary"
+            >
+                Resend Code
+            </button>
+        </div>
+
+        <p
+            id="modal-error"
+            class="hidden mt-4 text-sm text-red-500 text-center"
+        >
+        </p>
+    </div>
+</div>
+
+<script>
+    function initVerificationModal(onSuccess: (email: string) => void) {
+        const modal = document.getElementById("verification-modal");
+        const emailStep = document.getElementById("email-step");
+        const codeStep = document.getElementById("code-step");
+        const emailInput = document.getElementById(
+            "verification-email",
+        ) as HTMLInputElement;
+        const codeInput = document.getElementById(
+            "verification-code",
+        ) as HTMLInputElement;
+        const displayEmail = document.getElementById("display-email");
+        const sendCodeBtn = document.getElementById("send-code-btn");
+        const verifyCodeBtn = document.getElementById("verify-code-btn");
+        const resendCodeBtn = document.getElementById("resend-code-btn");
+        const cancelBtn = document.getElementById("cancel-verification-btn");
+        const errorMsg = document.getElementById("modal-error");
+
+        let currentEmail = "";
+
+        function showError(message: string) {
+            if (errorMsg) {
+                errorMsg.textContent = message;
+                errorMsg.classList.remove("hidden");
+            }
+        }
+
+        function hideError() {
+            if (errorMsg) {
+                errorMsg.classList.add("hidden");
+            }
+        }
+
+        function showModal() {
+            modal?.classList.remove("hidden");
+            emailStep?.classList.remove("hidden");
+            codeStep?.classList.add("hidden");
+            hideError();
+        }
+
+        function hideModal() {
+            modal?.classList.add("hidden");
+        }
+
+        async function sendCode(email: string) {
+            try {
+                const response = await fetch("/api/auth/send-code.json", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+
+                const result = await response.json();
+                return result.success;
+            } catch {
+                return false;
+            }
+        }
+
+        async function verifyCode(email: string, code: string) {
+            try {
+                const response = await fetch("/api/auth/verify-code.json", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, code }),
+                });
+
+                const result = await response.json();
+                return result.success;
+            } catch {
+                return false;
+            }
+        }
+
+        sendCodeBtn?.addEventListener("click", async () => {
+            const email = emailInput.value.trim();
+
+            if (!email || !email.includes("@")) {
+                showError("Please enter a valid email address");
+                return;
+            }
+
+            hideError();
+            sendCodeBtn.textContent = "Sending...";
+            sendCodeBtn.setAttribute("disabled", "true");
+
+            const sent = await sendCode(email);
+
+            if (sent) {
+                currentEmail = email;
+                if (displayEmail) displayEmail.textContent = email;
+                emailStep?.classList.add("hidden");
+                codeStep?.classList.remove("hidden");
+                codeInput.focus();
+            } else {
+                showError("Failed to send code. Please try again.");
+            }
+
+            sendCodeBtn.textContent = "Send Verification Code";
+            sendCodeBtn.removeAttribute("disabled");
+        });
+
+        verifyCodeBtn?.addEventListener("click", async () => {
+            const code = codeInput.value.trim();
+
+            if (code.length !== 4) {
+                showError("Please enter the 4-digit code");
+                return;
+            }
+
+            hideError();
+            verifyCodeBtn.textContent = "Verifying...";
+            verifyCodeBtn.setAttribute("disabled", "true");
+
+            const verified = await verifyCode(currentEmail, code);
+
+            if (verified) {
+                onSuccess(currentEmail);
+                hideModal();
+            } else {
+                showError("Invalid or expired code. Please try again.");
+                codeInput.value = "";
+                verifyCodeBtn.textContent = "Verify & Publish";
+                verifyCodeBtn.removeAttribute("disabled");
+            }
+        });
+
+        resendCodeBtn?.addEventListener("click", async () => {
+            resendCodeBtn.textContent = "Sending...";
+            await sendCode(currentEmail);
+            resendCodeBtn.textContent = "Code Sent!";
+            setTimeout(() => {
+                resendCodeBtn.textContent = "Resend Code";
+            }, 2000);
+        });
+
+        cancelBtn?.addEventListener("click", hideModal);
+
+        // Allow Enter key
+        emailInput?.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendCodeBtn?.click();
+        });
+
+        codeInput?.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") verifyCodeBtn?.click();
+        });
+
+        // Auto-format code input
+        codeInput?.addEventListener("input", (e) => {
+            const target = e.target as HTMLInputElement;
+            target.value = target.value.replace(/[^0-9]/g, "");
+        });
+
+        return { showModal, hideModal };
+    }
+
+    // Make it globally available
+    (window as any).initVerificationModal = initVerificationModal;
+</script>
+
+<style>
+    #verification-modal {
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>

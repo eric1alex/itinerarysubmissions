@@ -1,0 +1,142 @@
+---
+import { db, VerificationCode, User, eq, and } from 'astro:db';
+import { createSessionValue, getSessionCookieOptions } from '../../lib/auth';
+
+const url = new URL(Astro.request.url);
+const token = url.searchParams.get('token');
+
+let error = '';
+let success = false;
+
+if (!token) {
+  error = 'Invalid magic link';
+} else {
+  try {
+    // Find valid magic link token
+    const verificationCodes = await db
+      .select()
+      .from(VerificationCode)
+      .where(
+        and(
+          eq(VerificationCode.code, token),
+          eq(VerificationCode.purpose, 'login')
+        )
+      );
+    
+    const verification = verificationCodes[0];
+    
+    if (!verification) {
+      error = 'Invalid or expired magic link';
+    } else if (new Date() > new Date(verification.expiresAt)) {
+      error = 'This magic link has expired';
+    } else {
+      // Find user
+      const users = await db
+        .select()
+        .from(User)
+        .where(eq(User.email, verification.email));
+      
+      const user = users[0];
+      
+      if (!user) {
+        error = 'User not found';
+      } else {
+        // Update last login
+        await db
+          .update(User)
+          .set({ lastLoginAt: new Date() })
+          .where(eq(User.id, user.id));
+        
+        // Delete used token
+        await db
+          .delete(VerificationCode)
+          .where(eq(VerificationCode.id, verification.id));
+        
+        // Create session
+        const sessionValue = createSessionValue(user.id, user.email);
+        Astro.cookies.set('session', sessionValue, getSessionCookieOptions());
+        
+        success = true;
+        
+        // Redirect to my itineraries
+        return Astro.redirect('/my-itineraries');
+      }
+    }
+  } catch (err) {
+    console.error('Magic link error:', err);
+    error = 'An error occurred';
+  }
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logging In - Where In India</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-center;
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #3A86FF 0%, #2563EB 100%);
+      }
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        text-align: center;
+        max-width: 400px;
+      }
+      .icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+      }
+      h1 {
+        margin: 0 0 10px;
+        color: #333;
+      }
+      p {
+        color: #666;
+        margin: 0 0 20px;
+      }
+      a {
+        display: inline-block;
+        padding: 12px 24px;
+        background: #3A86FF;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+      }
+      a:hover {
+        background: #2563EB;
+      }
+      .error {
+        color: #DC2626;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      {error ? (
+        <>
+          <div class="icon error">❌</div>
+          <h1>Login Failed</h1>
+          <p class="error">{error}</p>
+          <a href="/login">Try Again</a>
+        </>
+      ) : (
+        <>
+          <div class="icon">⏳</div>
+          <h1>Logging you in...</h1>
+          <p>Please wait...</p>
+        </>
+      )}
+    </div>
+  </body>
+</html>
