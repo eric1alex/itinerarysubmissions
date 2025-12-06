@@ -3,11 +3,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 :root {
-  /* Light Mode Colors */
+  /* Light Mode: Blue primary */
   --primary: #3A86FF;
+  --primary-color: #3A86FF;
   --secondary: #FFBE0B;
   --background-light: #F8F9FA;
-  --background-dark: #101922;
+  --background-dark: #1a1a1a;
   --text-light: #333333;
   --text-dark: #E9ECEF;
   --border-light: #E9ECEF;
@@ -20,6 +21,8 @@
 }
 
 html.dark {
+  --primary: #FF671F;
+  --primary-color: #FF671F;
   --background: var(--background-dark);
   --text: var(--text-dark);
   --border: var(--border-dark);
@@ -33,10 +36,18 @@ html.dark {
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
   background-color: var(--background);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile: Reduce base font size */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
 }
 
 /* Material Symbols */

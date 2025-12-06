@@ -39,11 +39,13 @@ export function getSessionCookieOptions() {
 /**
  * Parse session from cookie value
  */
-export function parseSession(cookieValue: string | undefined): { userId: string; email: string } | null {
+export function parseSession(cookieValue: string | undefined): { userId: string; email: string; displayName?: string } | null {
     if (!cookieValue) return null;
 
     try {
-        const decoded = atob(cookieValue);
+        // URL-decode the cookie value first (handles %3D -> = etc)
+        const urlDecoded = decodeURIComponent(cookieValue);
+        const decoded = atob(urlDecoded);
         const data = JSON.parse(decoded);
         return data;
     } catch {
@@ -54,15 +56,15 @@ export function parseSession(cookieValue: string | undefined): { userId: string;
 /**
  * Create session cookie value
  */
-export function createSessionValue(userId: string, email: string): string {
-    const data = JSON.stringify({ userId, email });
+export function createSessionValue(userId: string, email: string, displayName?: string): string {
+    const data = JSON.stringify({ userId, email, displayName });
     return btoa(data);
 }
 
 /**
  * Get user from request
  */
-export function getUserFromRequest(request: Request): { userId: string; email: string } | null {
+export function getUserFromRequest(request: Request): { userId: string; email: string; displayName?: string } | null {
     const cookieHeader = request.headers.get('cookie');
     if (!cookieHeader) return null;
 

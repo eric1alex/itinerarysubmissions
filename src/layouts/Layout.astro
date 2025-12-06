@@ -49,10 +49,10 @@ const user = getUserFromRequest(Astro.request);
         theme: {
           extend: {
             colors: {
-              primary: "#3A86FF",
+              primary: "var(--primary-color)",
               secondary: "#FFBE0B",
               "background-light": "#F8F9FA",
-              "background-dark": "#101922",
+              "background-dark": "#1a1a1a",
               "text-light": "#333333",
               "text-dark": "#E9ECEF",
               "border-light": "#E9ECEF",
@@ -71,6 +71,26 @@ const user = getUserFromRequest(Astro.request);
         },
       };
     </script>
+    <style>
+      :root {
+        --primary-color: #3A86FF;
+      }
+      html.dark {
+        --primary-color: #FF671F;
+      }
+    </style>
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
+        } else {
+          document.documentElement.classList.add('light');
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
   </head>
   <body
     class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark"
@@ -87,59 +107,75 @@ const user = getUserFromRequest(Astro.request);
         >
           <a
             href="/itineraries"
-            class="flex items-center gap-4 text-text-light dark:text-text-dark"
+            class="flex items-center gap-3 text-text-light dark:text-text-dark"
           >
-            <div class="size-6 text-primary">
-              <svg
-                fill="none"
-                viewBox="0 0 48 48"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z"
-                  fill="currentColor"></path>
-              </svg>
-            </div>
+            <img src="/flag.png" alt="Where In India" class="h-8 w-auto" />
             <h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">
               Where In India
             </h2>
           </a>
-          <div class="flex items-center gap-6">
-            <a
-              class="text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary"
-              href="/itineraries">Itineraries</a
+          <div class="flex items-center gap-4">
+            <!-- Desktop Theme Toggle -->
+            <button
+              id="theme-toggle-desktop"
+              class="hidden sm:flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Toggle theme"
             >
-            
+              <span class="material-symbols-outlined text-xl text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
+              <span class="material-symbols-outlined text-xl text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
+            </button>
             {user ? (
               <!-- Logged In: Profile Menu -->
               <div class="relative">
                 <button
                   id="profile-btn"
-                  class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  title="Account menu"
                 >
-                  <div
-                    class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-8"
-                    style={`background-image: url("https://ui-avatars.com/api/?name=${encodeURIComponent(user.email)}&background=3A86FF&color=fff");`}
-                  >
-                  </div>
-                  <span class="material-symbols-outlined text-lg">expand_more</span>
+                  <span class="material-symbols-outlined text-2xl text-gray-600 dark:text-gray-300">account_circle</span>
                 </button>
                 
                 <div
                   id="profile-menu"
-                  class="hidden absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-border-light dark:border-border-dark py-2 z-50"
+                  class="hidden absolute right-0 mt-2 w-64 bg-white dark:bg-neutral-800 rounded-lg shadow-xl border border-border-light dark:border-neutral-700 py-2 z-50"
                 >
                   <div class="px-4 py-3 border-b border-border-light dark:border-border-dark">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      {user.displayName || user.email}
+                    </p>
+                    {user.displayName && (
+                      <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{user.email}</p>
+                    )}
                   </div>
                   
                   <a
+                    href="/account-settings"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700"
+                  >
+                    <span class="material-symbols-outlined text-xl">settings</span>
+                    <span>Account Settings</span>
+                  </a>
+                  
+                  <a
                     href="/my-itineraries"
-                    class="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700"
                   >
                     <span class="material-symbols-outlined text-xl">map</span>
                     <span>My Itineraries</span>
                   </a>
+                  
+                  <!-- Mobile Theme Toggle -->
+                  <button
+                    id="theme-toggle-mobile"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700 sm:hidden"
+                  >
+                    <span class="material-symbols-outlined text-xl dark:hidden">dark_mode</span>
+                    <span class="material-symbols-outlined text-xl hidden dark:inline">light_mode</span>
+                    <span class="dark:hidden">Dark Mode</span>
+                    <span class="hidden dark:inline">Light Mode</span>
+                  </button>
+                  
+                  <div class="border-t border-border-light dark:border-border-dark my-2"></div>
                   
                   <button
                     id="delete-account-btn"
@@ -148,26 +184,16 @@ const user = getUserFromRequest(Astro.request);
                     <span class="material-symbols-outlined text-xl">delete_forever</span>
                     <span>Delete Account</span>
                   </button>
-                  
-                  <div class="border-t border-border-light dark:border-border-dark my-2"></div>
-                  
-                  <button
-                    id="logout-btn"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    <span class="material-symbols-outlined text-xl">logout</span>
-                    <span>Log Out</span>
-                  </button>
                 </div>
               </div>
             ) : (
-              <!-- Logged Out: Login Button -->
+              <!-- Logged Out: Person Icon -->
               <a
                 href="/login"
-                class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Sign in"
               >
-                <span class="material-symbols-outlined text-lg">login</span>
-                <span>Login</span>
+                <span class="material-symbols-outlined text-2xl text-gray-600 dark:text-gray-300">account_circle</span>
               </a>
             )}
           </div>
@@ -195,10 +221,35 @@ const user = getUserFromRequest(Astro.request);
     </div>
     
     <script>
+      // Theme toggle function
+      function toggleTheme() {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light');
+          localStorage.setItem('theme', 'light');
+        } else {
+          document.documentElement.classList.remove('light');
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      }
+      
+      // Desktop theme toggle
+      const themeToggleDesktop = document.getElementById('theme-toggle-desktop');
+      if (themeToggleDesktop) {
+        themeToggleDesktop.addEventListener('click', toggleTheme);
+      }
+      
+      // Mobile theme toggle
+      const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+      if (themeToggleMobile) {
+        themeToggleMobile.addEventListener('click', toggleTheme);
+      }
+      
       // Profile menu toggle
       const profileBtn = document.getElementById('profile-btn');
       const profileMenu = document.getElementById('profile-menu');
-      const logoutBtn = document.getElementById('logout-btn');
       const deleteAccountBtn = document.getElementById('delete-account-btn');
       
       if (profileBtn && profileMenu) {
@@ -214,18 +265,6 @@ const user = getUserFromRequest(Astro.request);
         
         profileMenu.addEventListener('click', (e) => {
           e.stopPropagation();
-        });
-      }
-      
-      // Logout
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-          try {
-            await fetch('/api/auth/logout.json', { method: 'POST' });
-            window.location.href = '/';
-          } catch (error) {
-            alert('Failed to log out');
-          }
         });
       }
       

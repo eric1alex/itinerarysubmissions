@@ -18,15 +18,16 @@ export interface Itinerary {
     id: string;
     title: string;
     author: string;
-    location: string;
+    fromLocation: string;
+    toLocation: string;
     startDate: string;
     endDate: string;
     duration: string;
-    tripType: string;
-    budget: string;
+    tripType?: string;
+    budget?: string;
     summary: string;
     days: Day[];
-    tags: string[];
+    tags?: string[];
     coverImage?: string;
     transport?: string;
     createdAt: string;
@@ -37,9 +38,11 @@ export interface ItineraryListItem {
     id: string;
     title: string;
     author: string;
+    fromLocation: string;
+    toLocation: string;
     coverImage?: string;
     duration: string;
     transport?: string;
-    tags: string[];
+    tags?: string[];
     createdAt: string;
 }

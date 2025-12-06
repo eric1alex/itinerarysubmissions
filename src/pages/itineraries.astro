@@ -7,17 +7,16 @@ const itinerariesData = await db
     .select({
         id: Itinerary.id,
         title: Itinerary.title,
-        author: User.email,
+        fromLocation: Itinerary.fromLocation,
+        toLocation: Itinerary.toLocation,
         coverImage: Itinerary.coverImage,
         duration: Itinerary.duration,
         transport: Itinerary.transport,
-        tags: Itinerary.tags,
         createdAt: Itinerary.createdAt,
     })
     .from(Itinerary)
     .innerJoin(User, eq(Itinerary.userId, User.id))
-    .where(eq(Itinerary.isPublished, true))
-    .orderBy(Itinerary.createdAt, "desc");
+    .where(eq(Itinerary.isPublished, true));
 
 const placeholderImage =
     "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&h=600&fit=crop";
@@ -40,7 +39,7 @@ const placeholderImage =
             </div>
             <a
                 href="/submit"
-                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg shadow-sm hover:bg-primary/90 transition-colors"
             >
                 <span class="material-symbols-outlined text-base">add</span>
                 <span>Create New</span>
@@ -48,44 +47,56 @@ const placeholderImage =
         </div>
 
         <div
-            class="px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-border-light dark:border-border-dark mb-6"
+            class="px-4 py-3 bg-white dark:bg-neutral-800 rounded-xl border border-border-light dark:border-neutral-700 mb-6"
         >
             <label class="flex flex-col min-w-40 h-12 w-full">
                 <div class="flex w-full flex-1 items-stretch rounded-lg h-full">
                     <div
-                        class="text-gray-500 dark:text-gray-400 flex bg-gray-100 dark:bg-gray-700 items-center justify-center pl-4 rounded-l-lg"
+                        class="text-gray-500 dark:text-gray-400 flex bg-gray-100 dark:bg-neutral-700 items-center justify-center pl-4 rounded-l-lg"
                     >
                         <span class="material-symbols-outlined">search</span>
                     </div>
                     <input
                         id="search-input"
-                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-gray-700 h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal"
-                        placeholder="Search by destination, city, or country"
+                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-text-light dark:text-text-dark focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-neutral-700 h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 px-4 text-base font-normal leading-normal"
+                        placeholder="Search by destination or title"
                     />
                 </div>
             </label>
         </div>
 
         <div class="flex gap-3 px-4 flex-wrap mb-6">
-            <select
-                id="transport-filter"
-                class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-100 dark:bg-gray-700 pl-4 pr-2 text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-border-dark transition-colors border-0 cursor-pointer"
-            >
-                <option value="">All Transport</option>
-                <option value="Car">Car</option>
-                <option value="Train">Train</option>
-                <option value="Flight">Flight</option>
-                <option value="Boat">Boat</option>
-                <option value="Bus">Bus</option>
-            </select>
+            <div class="relative">
+                <select
+                    id="transport-filter"
+                    class="appearance-none h-10 pl-4 pr-10 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600 text-text-light dark:text-text-dark text-sm font-medium cursor-pointer hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors"
+                >
+                    <option value="">All Transport</option>
+                    <option value="Car">Car</option>
+                    <option value="Train">Train</option>
+                    <option value="Flight">Flight</option>
+                    <option value="Boat">Boat</option>
+                    <option value="Bus">Bus</option>
+                </select>
+                <span
+                    class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-lg"
+                    >expand_more</span
+                >
+            </div>
 
-            <select
-                id="sort-filter"
-                class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-100 dark:bg-gray-700 pl-4 pr-2 text-text-light dark:text-text-dark text-sm font-medium leading-normal hover:bg-gray-200 dark:hover:bg-border-dark transition-colors border-0 cursor-pointer"
-            >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-            </select>
+            <div class="relative">
+                <select
+                    id="sort-filter"
+                    class="appearance-none h-10 pl-4 pr-10 rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-600 text-text-light dark:text-text-dark text-sm font-medium cursor-pointer hover:border-primary focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-colors"
+                >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+                <span
+                    class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-lg"
+                    >expand_more</span
+                >
+            </div>
         </div>
 
         {
@@ -108,30 +119,49 @@ const placeholderImage =
             ) : (
                 <div
                     id="itineraries-grid"
-                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
                 >
                     {itinerariesData.map((itinerary) => (
                         <a
                             href={`/itinerary/${itinerary.id}`}
-                            class="itinerary-card group flex flex-col gap-3 rounded-xl bg-white dark:bg-gray-800/50 border border-border-light dark:border-border-dark shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 overflow-hidden cursor-pointer"
+                            class="itinerary-card group flex flex-col rounded-xl bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 cursor-pointer transition-all duration-200 hover:border-primary hover:shadow-lg overflow-hidden"
                             data-id={itinerary.id}
                             data-transport={itinerary.transport || ""}
-                            data-tags={JSON.stringify(itinerary.tags)}
                             data-title={itinerary.title}
+                            data-from={itinerary.fromLocation}
+                            data-to={itinerary.toLocation}
                             data-created={itinerary.createdAt.toISOString()}
                         >
                             <div
-                                class="w-full bg-center bg-no-repeat aspect-video bg-cover"
+                                class="w-full aspect-video bg-center bg-no-repeat bg-cover"
                                 style={`background-image: url("${itinerary.coverImage || placeholderImage}");`}
-                            ></div>
-                            <div class="p-4 flex flex-col gap-3">
-                                <p class="text-text-light dark:text-text-dark text-base font-bold leading-normal">
+                            />
+
+                            <div class="p-4 flex flex-col">
+                                <div class="flex items-center gap-2 text-primary mb-2">
+                                    <span class="material-symbols-outlined text-lg">
+                                        flight_takeoff
+                                    </span>
+                                    <p class="text-sm font-semibold">
+                                        {itinerary.fromLocation} →{" "}
+                                        {itinerary.toLocation}
+                                    </p>
+                                </div>
+
+                                <p class="text-gray-900 dark:text-white text-base font-bold leading-snug line-clamp-2 mb-3 group-hover:text-primary transition-colors">
                                     {itinerary.title}
                                 </p>
-                                <div class="flex items-center gap-4 text-gray-500 dark:text-gray-400">
+
+                                <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-sm mt-auto">
+                                    <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-neutral-700 px-2 py-1 rounded">
+                                        <span class="material-symbols-outlined text-base">
+                                            schedule
+                                        </span>
+                                        <span>{itinerary.duration}</span>
+                                    </div>
                                     {itinerary.transport && (
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="material-symbols-outlined text-lg">
+                                        <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-neutral-700 px-2 py-1 rounded">
+                                            <span class="material-symbols-outlined text-base">
                                                 {itinerary.transport === "Car"
                                                     ? "directions_car"
                                                     : itinerary.transport ===
@@ -145,23 +175,10 @@ const placeholderImage =
                                                           ? "flight"
                                                           : "directions_bus"}
                                             </span>
-                                            <p class="text-sm font-normal">
-                                                {itinerary.transport}
-                                            </p>
+                                            <span>{itinerary.transport}</span>
                                         </div>
                                     )}
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-lg">
-                                            calendar_today
-                                        </span>
-                                        <p class="text-sm font-normal">
-                                            {itinerary.duration}
-                                        </p>
-                                    </div>
                                 </div>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm font-normal leading-normal">
-                                    By {itinerary.author.split("@")[0]}
-                                </p>
                             </div>
                         </a>
                     ))}
@@ -172,7 +189,6 @@ const placeholderImage =
 </Layout>
 
 <script>
-    // Filter and search functionality
     function applyFilters(): void {
         const searchInput =
             (
@@ -189,25 +205,23 @@ const placeholderImage =
             document.querySelectorAll(".itinerary-card"),
         ) as HTMLElement[];
 
-        // Filter
         cards.forEach((card) => {
             const title = card.getAttribute("data-title")?.toLowerCase() || "";
-            const tags = card.getAttribute("data-tags")?.toLowerCase() || "";
+            const from = card.getAttribute("data-from")?.toLowerCase() || "";
+            const to = card.getAttribute("data-to")?.toLowerCase() || "";
             const transport = card.getAttribute("data-transport") || "";
 
             const matchesSearch =
-                title.includes(searchInput) || tags.includes(searchInput);
+                title.includes(searchInput) ||
+                from.includes(searchInput) ||
+                to.includes(searchInput);
             const matchesTransport =
                 !transportFilter || transport === transportFilter;
 
-            if (matchesSearch && matchesTransport) {
-                card.style.display = "flex";
-            } else {
-                card.style.display = "none";
-            }
+            card.style.display =
+                matchesSearch && matchesTransport ? "flex" : "none";
         });
 
-        // Sort visible cards
         const visibleCards = cards.filter(
             (card) => card.style.display !== "none",
         );
@@ -227,7 +241,6 @@ const placeholderImage =
         }
     }
 
-    // Event listeners for filters
     document
         .getElementById("search-input")
         ?.addEventListener("input", applyFilters);

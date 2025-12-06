@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
                 lastLoginAt: new Date(),
             });
 
-            user = { id: userId, email: email.toLowerCase() };
+            user = { id: userId, email: email.toLowerCase(), displayName: null };
         } else {
             // Update last login
             await db
@@ -76,14 +76,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             .delete(VerificationCode)
             .where(eq(VerificationCode.id, verification.id));
 
-        // Create session
-        const sessionValue = createSessionValue(user.id, user.email);
+        // Create session with displayName
+        const sessionValue = createSessionValue(user.id, user.email, user.displayName || undefined);
         cookies.set('session', sessionValue, getSessionCookieOptions());
 
         return new Response(JSON.stringify({
             success: true,
             userId: user.id,
-            email: user.email
+            email: user.email,
+            displayName: user.displayName
         }), { status: 200 });
 
     } catch (error) {

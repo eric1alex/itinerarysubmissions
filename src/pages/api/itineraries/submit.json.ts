@@ -1,19 +1,15 @@
 import type { APIRoute } from 'astro';
 import type { Itinerary } from '../../../types/itinerary';
-import { db, Itinerary as ItineraryTable } from 'astro:db';
+import { db, Itinerary as ItineraryTable, User, eq } from 'astro:db';
 import { parseSession } from '../../../lib/auth';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request, cookies }) => {
     try {
-        // Debug: Log session cookie
-        console.log('Session cookie:', cookies.get('session'));
-
-        // Get authenticated user from Astro cookies (not request headers)
+        // Get authenticated user from Astro cookies
         const sessionCookie = cookies.get('session');
         const user = sessionCookie?.value ? parseSession(sessionCookie.value) : null;
-        console.log('User from session:', user);
 
         if (!user) {
             return new Response(JSON.stringify({
@@ -23,6 +19,18 @@ export const POST: APIRoute = async ({ request, cookies }) => {
                 status: 401,
                 headers: { 'Content-Type': 'application/json' }
             });
+        }
+
+        // Get user's display name from database if not in session
+        let authorName = user.displayName || user.email;
+        if (!user.displayName) {
+            const users = await db
+                .select()
+                .from(User)
+                .where(eq(User.id, user.userId));
+            if (users[0]?.displayName) {
+                authorName = users[0].displayName;
+            }
         }
 
         const data: Itinerary = await request.json();
@@ -35,16 +43,17 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             userId: user.userId,
             title: data.title,
             summary: data.summary,
-            location: data.location,
+            fromLocation: data.fromLocation,
+            toLocation: data.toLocation,
             startDate: data.startDate,
             endDate: data.endDate,
             duration: data.duration,
-            tripType: data.tripType,
+            tripType: data.tripType || '',
             budget: data.budget || '',
             transport: data.transport || '',
             days: data.days,
-            tags: data.tags,
-            coverImage: data.coverImage,
+            tags: data.tags || [],
+            coverImage: data.coverImage || null,
             isPublished: true,
             createdAt: now,
             updatedAt: now,

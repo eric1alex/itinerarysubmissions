@@ -42,7 +42,7 @@ const editId = url.searchParams.get("id");
                                 id="title"
                                 name="title"
                                 required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                                 placeholder="e.g., 10-Day Backpacking Trip in Rajasthan"
                             />
                         </label>
@@ -58,40 +58,96 @@ const editId = url.searchParams.get("id");
                                 name="summary"
                                 required
                                 rows="3"
-                                class="form-textarea flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                class="form-textarea flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                                 placeholder="Brief description of your trip..."
                             ></textarea>
                         </label>
                     </div>
 
-                    <!-- Author & Location -->
+                    <!-- Cover Image Upload -->
+                    <div class="flex w-full flex-col gap-4">
+                        <label class="flex flex-col w-full">
+                            <p
+                                class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
+                            >
+                                Cover Image
+                            </p>
+                            <div class="flex flex-col gap-3">
+                                <div
+                                    id="image-preview-container"
+                                    class="hidden relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-600"
+                                >
+                                    <img
+                                        id="image-preview"
+                                        class="w-full h-full object-cover"
+                                        alt="Cover preview"
+                                    />
+                                    <button
+                                        type="button"
+                                        id="remove-image-btn"
+                                        class="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-sm"
+                                            >close</span
+                                        >
+                                    </button>
+                                </div>
+                                <label
+                                    class="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-primary hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
+                                >
+                                    <div
+                                        class="flex flex-col items-center gap-2"
+                                    >
+                                        <span
+                                            class="material-symbols-outlined text-3xl text-gray-400"
+                                            >add_photo_alternate</span
+                                        >
+                                        <span
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                            >Click to upload an image</span
+                                        >
+                                    </div>
+                                    <input
+                                        type="file"
+                                        id="cover-image"
+                                        name="coverImage"
+                                        accept="image/*"
+                                        class="hidden"
+                                    />
+                                </label>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- From & To Locations -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="flex flex-col w-full">
                             <p
                                 class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
                             >
-                                Your Name *
+                                From *
                             </p>
                             <input
-                                id="author"
-                                name="author"
+                                id="fromLocation"
+                                name="fromLocation"
                                 required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
-                                placeholder="e.g., Alex Doe"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                placeholder="e.g., Delhi"
                             />
                         </label>
                         <label class="flex flex-col w-full">
                             <p
                                 class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
                             >
-                                Location *
+                                To *
                             </p>
                             <input
-                                id="location"
-                                name="location"
+                                id="toLocation"
+                                name="toLocation"
                                 required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
-                                placeholder="e.g., Rajasthan, India"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                placeholder="e.g., Jaipur, Rajasthan"
                             />
                         </label>
                     </div>
@@ -109,7 +165,7 @@ const editId = url.searchParams.get("id");
                                 name="startDate"
                                 type="date"
                                 required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                             />
                         </label>
                         <label class="flex flex-col w-full">
@@ -123,13 +179,13 @@ const editId = url.searchParams.get("id");
                                 name="endDate"
                                 type="date"
                                 required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                             />
                         </label>
                     </div>
 
-                    <!-- Duration, Trip Type, Budget -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Duration & Budget -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="flex flex-col w-full">
                             <p
                                 class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
@@ -140,22 +196,8 @@ const editId = url.searchParams.get("id");
                                 id="duration"
                                 name="duration"
                                 required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                                 placeholder="e.g., 10 Days"
-                            />
-                        </label>
-                        <label class="flex flex-col w-full">
-                            <p
-                                class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
-                            >
-                                Trip Type *
-                            </p>
-                            <input
-                                id="tripType"
-                                name="tripType"
-                                required
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
-                                placeholder="e.g., Backpacking"
                             />
                         </label>
                         <label class="flex flex-col w-full">
@@ -167,7 +209,7 @@ const editId = url.searchParams.get("id");
                             <input
                                 id="budget"
                                 name="budget"
-                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                                 placeholder="e.g., ₹50,000"
                             />
                         </label>
@@ -183,7 +225,7 @@ const editId = url.searchParams.get("id");
                         <input
                             id="transport"
                             name="transport"
-                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                             placeholder="e.g., Car, Train, Flight"
                         />
                     </label>
@@ -202,39 +244,10 @@ const editId = url.searchParams.get("id");
                         <button
                             type="button"
                             id="add-day-btn"
-                            class="flex min-w-[120px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 dark:hover:bg-gray-600"
+                            class="flex min-w-[120px] max-w-full cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-100 dark:bg-neutral-700 text-gray-800 dark:text-gray-200 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 dark:hover:bg-neutral-600"
                         >
                             <span class="truncate">Add Another Day</span>
                         </button>
-                    </div>
-
-                    <!-- Tags -->
-                    <div class="flex w-full flex-col gap-4">
-                        <label class="flex flex-col w-full">
-                            <p
-                                class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
-                            >
-                                Add Tags
-                            </p>
-                            <div class="flex gap-2">
-                                <input
-                                    id="tag-input"
-                                    type="text"
-                                    class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
-                                    placeholder="e.g., Jaipur, Heritage, Adventure"
-                                />
-                                <button
-                                    type="button"
-                                    id="add-tag-btn"
-                                    class="flex items-center justify-center px-6 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600"
-                                >
-                                    Add
-                                </button>
-                            </div>
-                        </label>
-                        <div id="tags-container" class="flex gap-3 flex-wrap">
-                            <!-- Tags will be added here dynamically -->
-                        </div>
                     </div>
                 </div>
 
@@ -242,7 +255,7 @@ const editId = url.searchParams.get("id");
                     <button
                         type="button"
                         id="save-draft-btn"
-                        class="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 dark:hover:bg-gray-600"
+                        class="flex min-w-[120px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-gray-100 dark:bg-neutral-700 text-gray-800 dark:text-gray-200 text-base font-bold leading-normal tracking-[0.015em] hover:bg-gray-200 dark:hover:bg-neutral-600"
                     >
                         <span class="truncate">Save Draft</span>
                     </button>
@@ -267,7 +280,7 @@ const editId = url.searchParams.get("id");
 
     // State
     let days: Day[] = [];
-    let tags: string[] = [];
+    let coverImageBase64: string | null = null;
     let editingId: string | null = null;
 
     // Helper to generate unique IDs
@@ -301,7 +314,7 @@ const editId = url.searchParams.get("id");
     // Render a single day
     function renderDay(day: Day, index: number): string {
         return `
-            <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800/50" data-day-index="${index}">
+            <div class="rounded-lg border border-gray-200 dark:border-neutral-600 p-4 bg-white dark:bg-neutral-800" data-day-index="${index}">
                 <div class="flex flex-col gap-4">
                     <div class="flex justify-between items-center">
                         <input 
@@ -329,7 +342,7 @@ const editId = url.searchParams.get("id");
     // Render a single activity
     function renderActivity(activity: Activity, index: number): string {
         return `
-            <div class="activity flex flex-col gap-2 p-3 rounded bg-gray-50 dark:bg-gray-700/50" data-activity-index="${index}">
+            <div class="activity flex flex-col gap-2 p-3 rounded bg-gray-50 dark:bg-neutral-700" data-activity-index="${index}">
                 <div class="flex justify-between items-start gap-2">
                     <input 
                         type="text" 
@@ -521,37 +534,44 @@ const editId = url.searchParams.get("id");
         });
     }
 
-    // Render tags
-    function renderTags(): void {
-        const container = document.getElementById("tags-container");
-        if (!container) return;
+    // Image upload handling
+    const imageInput = document.getElementById(
+        "cover-image",
+    ) as HTMLInputElement;
+    const imagePreviewContainer = document.getElementById(
+        "image-preview-container",
+    );
+    const imagePreview = document.getElementById(
+        "image-preview",
+    ) as HTMLImageElement;
+    const removeImageBtn = document.getElementById("remove-image-btn");
 
-        container.innerHTML = tags
-            .map(
-                (tag, index) => `
-            <div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-gray-100 dark:bg-gray-700 pl-4 pr-3">
-                <p class="text-gray-800 dark:text-gray-200 text-sm font-medium leading-normal">${tag}</p>
-                <button type="button" class="remove-tag cursor-pointer" data-index="${index}">
-                    <span class="material-symbols-outlined text-base text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100">close</span>
-                </button>
-            </div>
-        `,
-            )
-            .join("");
+    imageInput?.addEventListener("change", (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+            // Check file size (max 2MB for base64)
+            if (file.size > 2 * 1024 * 1024) {
+                showToast("Image must be less than 2MB", "error");
+                return;
+            }
 
-        // Attach remove listeners
-        document.querySelectorAll(".remove-tag").forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-                const index = parseInt(
-                    (e.currentTarget as HTMLElement).getAttribute(
-                        "data-index",
-                    ) || "0",
-                );
-                tags.splice(index, 1);
-                renderTags();
-            });
-        });
-    }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                coverImageBase64 = event.target?.result as string;
+                if (imagePreview && imagePreviewContainer) {
+                    imagePreview.src = coverImageBase64;
+                    imagePreviewContainer.classList.remove("hidden");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeImageBtn?.addEventListener("click", () => {
+        coverImageBase64 = null;
+        if (imageInput) imageInput.value = "";
+        imagePreviewContainer?.classList.add("hidden");
+    });
 
     // Add day
     document.getElementById("add-day-btn")?.addEventListener("click", () => {
@@ -561,28 +581,6 @@ const editId = url.searchParams.get("id");
             activities: [],
         });
         renderDays();
-    });
-
-    // Add tag
-    function addTag(): void {
-        const input = document.getElementById("tag-input") as HTMLInputElement;
-        if (input && input.value.trim()) {
-            const newTags = input.value
-                .split(",")
-                .map((t) => t.trim())
-                .filter((t) => t);
-            tags.push(...newTags);
-            input.value = "";
-            renderTags();
-        }
-    }
-
-    document.getElementById("add-tag-btn")?.addEventListener("click", addTag);
-    document.getElementById("tag-input")?.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            addTag();
-        }
     });
 
     // Save draft to localStorage
@@ -602,16 +600,15 @@ const editId = url.searchParams.get("id");
         return {
             title: formData.get("title"),
             summary: formData.get("summary"),
-            author: formData.get("author"),
-            location: formData.get("location"),
+            fromLocation: formData.get("fromLocation"),
+            toLocation: formData.get("toLocation"),
             startDate: formData.get("startDate"),
             endDate: formData.get("endDate"),
             duration: formData.get("duration"),
-            tripType: formData.get("tripType"),
             budget: formData.get("budget"),
             transport: formData.get("transport"),
             days: days,
-            tags: tags,
+            coverImage: coverImageBase64,
         };
     }
 
@@ -637,16 +634,16 @@ const editId = url.searchParams.get("id");
                 id: editingId || generateId(),
                 title: formData.title as string,
                 summary: formData.summary as string,
-                author: formData.author as string,
-                location: formData.location as string,
+                author: "", // Will be set by server from session
+                fromLocation: formData.fromLocation as string,
+                toLocation: formData.toLocation as string,
                 startDate: formData.startDate as string,
                 endDate: formData.endDate as string,
                 duration: formData.duration as string,
-                tripType: formData.tripType as string,
                 budget: (formData.budget as string) || "",
                 transport: (formData.transport as string) || "",
                 days: days,
-                tags: tags,
+                coverImage: coverImageBase64 || undefined,
                 createdAt: editingId
                     ? (await loadExistingItinerary(editingId))?.createdAt || now
                     : now,
@@ -755,11 +752,12 @@ const editId = url.searchParams.get("id");
                 (
                     document.getElementById("summary") as HTMLTextAreaElement
                 ).value = existing.summary;
-                (document.getElementById("author") as HTMLInputElement).value =
-                    existing.author;
                 (
-                    document.getElementById("location") as HTMLInputElement
-                ).value = existing.location;
+                    document.getElementById("fromLocation") as HTMLInputElement
+                ).value = existing.fromLocation;
+                (
+                    document.getElementById("toLocation") as HTMLInputElement
+                ).value = existing.toLocation;
                 (
                     document.getElementById("startDate") as HTMLInputElement
                 ).value = existing.startDate;
@@ -768,9 +766,6 @@ const editId = url.searchParams.get("id");
                 (
                     document.getElementById("duration") as HTMLInputElement
                 ).value = existing.duration;
-                (
-                    document.getElementById("tripType") as HTMLInputElement
-                ).value = existing.tripType;
                 (document.getElementById("budget") as HTMLInputElement).value =
                     existing.budget || "";
                 (
@@ -778,10 +773,22 @@ const editId = url.searchParams.get("id");
                 ).value = existing.transport || "";
 
                 days = existing.days;
-                tags = existing.tags;
+
+                if (existing.coverImage) {
+                    coverImageBase64 = existing.coverImage;
+                    const preview = document.getElementById(
+                        "image-preview",
+                    ) as HTMLImageElement;
+                    const container = document.getElementById(
+                        "image-preview-container",
+                    );
+                    if (preview && container) {
+                        preview.src = existing.coverImage;
+                        container.classList.remove("hidden");
+                    }
+                }
 
                 renderDays();
-                renderTags();
                 return;
             }
         }
@@ -799,11 +806,12 @@ const editId = url.searchParams.get("id");
                 (
                     document.getElementById("summary") as HTMLTextAreaElement
                 ).value = draftData.summary || "";
-                (document.getElementById("author") as HTMLInputElement).value =
-                    draftData.author || "";
                 (
-                    document.getElementById("location") as HTMLInputElement
-                ).value = draftData.location || "";
+                    document.getElementById("fromLocation") as HTMLInputElement
+                ).value = draftData.fromLocation || "";
+                (
+                    document.getElementById("toLocation") as HTMLInputElement
+                ).value = draftData.toLocation || "";
                 (
                     document.getElementById("startDate") as HTMLInputElement
                 ).value = draftData.startDate || "";
@@ -812,9 +820,6 @@ const editId = url.searchParams.get("id");
                 (
                     document.getElementById("duration") as HTMLInputElement
                 ).value = draftData.duration || "";
-                (
-                    document.getElementById("tripType") as HTMLInputElement
-                ).value = draftData.tripType || "";
                 (document.getElementById("budget") as HTMLInputElement).value =
                     draftData.budget || "";
                 (
@@ -822,7 +827,20 @@ const editId = url.searchParams.get("id");
                 ).value = draftData.transport || "";
 
                 days = draftData.days || [];
-                tags = draftData.tags || [];
+
+                if (draftData.coverImage) {
+                    coverImageBase64 = draftData.coverImage;
+                    const preview = document.getElementById(
+                        "image-preview",
+                    ) as HTMLImageElement;
+                    const container = document.getElementById(
+                        "image-preview-container",
+                    );
+                    if (preview && container) {
+                        preview.src = draftData.coverImage;
+                        container.classList.remove("hidden");
+                    }
+                }
             }
         }
 
@@ -836,7 +854,6 @@ const editId = url.searchParams.get("id");
         }
 
         renderDays();
-        renderTags();
     }
 
     init();
