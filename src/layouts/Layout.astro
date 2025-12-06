@@ -187,7 +187,15 @@ const user = getUserFromRequest(Astro.request);
                 </div>
               </div>
             ) : (
-              <!-- Logged Out: Person Icon -->
+              <!-- Logged Out: Theme Toggle + Person Icon -->
+              <button
+                id="theme-toggle-mobile-guest"
+                class="flex sm:hidden items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="Toggle theme"
+              >
+                <span class="material-symbols-outlined text-xl text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
+                <span class="material-symbols-outlined text-xl text-gray-600 dark:text-gray-300 hidden dark:inline">light_mode</span>
+              </button>
               <a
                 href="/login"
                 class="flex items-center justify-center size-10 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
@@ -241,10 +249,16 @@ const user = getUserFromRequest(Astro.request);
         themeToggleDesktop.addEventListener('click', toggleTheme);
       }
       
-      // Mobile theme toggle
+      // Mobile theme toggle (logged in)
       const themeToggleMobile = document.getElementById('theme-toggle-mobile');
       if (themeToggleMobile) {
         themeToggleMobile.addEventListener('click', toggleTheme);
+      }
+      
+      // Mobile theme toggle (guest/logged out)
+      const themeToggleMobileGuest = document.getElementById('theme-toggle-mobile-guest');
+      if (themeToggleMobileGuest) {
+        themeToggleMobileGuest.addEventListener('click', toggleTheme);
       }
       
       // Profile menu toggle

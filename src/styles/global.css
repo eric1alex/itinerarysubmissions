@@ -106,3 +106,15 @@ ol {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
+
+/* Hide native select dropdown arrow */
+select.appearance-none {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none;
+}
+
+select.appearance-none::-ms-expand {
+  display: none;
+}
