@@ -179,11 +179,11 @@ const user = getUserFromRequest(Astro.request);
                   <div class="border-t border-border-light dark:border-border-dark my-2"></div>
                   
                   <button
-                    id="delete-account-btn"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    id="logout-btn"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-neutral-700"
                   >
-                    <span class="material-symbols-outlined text-xl">delete_forever</span>
-                    <span>Delete Account</span>
+                    <span class="material-symbols-outlined text-xl">logout</span>
+                    <span>Logout</span>
                   </button>
                 </div>
               </div>
@@ -265,7 +265,7 @@ const user = getUserFromRequest(Astro.request);
       // Profile menu toggle
       const profileBtn = document.getElementById('profile-btn');
       const profileMenu = document.getElementById('profile-menu');
-      const deleteAccountBtn = document.getElementById('delete-account-btn');
+      const logoutBtn = document.getElementById('logout-btn');
       
       if (profileBtn && profileMenu) {
         profileBtn.addEventListener('click', (e) => {
@@ -283,24 +283,17 @@ const user = getUserFromRequest(Astro.request);
         });
       }
       
-      // Delete account
-      if (deleteAccountBtn) {
-        deleteAccountBtn.addEventListener('click', async () => {
-          const confirmed = confirm(
-            'Are you sure you want to delete your account? This will permanently delete all your itineraries and cannot be undone.'
-          );
-          
-          if (!confirmed) return;
-          
+      // Logout
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
           try {
-            const response = await fetch('/api/auth/delete-account.json', { method: 'POST' });
+            const response = await fetch('/api/auth/logout.json', { method: 'POST' });
             const result = await response.json();
             
             if (result.success) {
-              alert('Your account has been deleted.');
               window.location.href = '/';
             } else {
-              alert(result.message || 'Failed to delete account');
+              alert('Failed to logout');
             }
           } catch (error) {
             alert('An error occurred');

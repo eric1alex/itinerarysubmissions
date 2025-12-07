@@ -68,65 +68,94 @@ const formatDate = (dateStr: string | Date) => {
                     </a>
                 </div>
             ) : (
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
                     {itineraries.map((itinerary) => (
-                        <div class="group relative flex flex-col bg-white dark:bg-gray-800/50 border border-border-light dark:border-border-dark rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden">
+                        <div
+                            class="itinerary-card group flex flex-col rounded-xl bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 transition-all duration-200 hover:border-primary hover:shadow-lg overflow-hidden"
+                            data-id={itinerary.id}
+                        >
                             {itinerary.coverImage ? (
                                 <div
-                                    class="w-full bg-center bg-no-repeat aspect-video bg-cover"
+                                    class="w-full aspect-video bg-center bg-no-repeat bg-cover"
                                     style={`background-image: url("${itinerary.coverImage}");`}
                                 />
                             ) : (
-                                <div class="w-full aspect-video bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-6xl text-gray-400">
-                                        landscape
-                                    </span>
-                                </div>
+                                <div
+                                    class="w-full aspect-video bg-center bg-no-repeat bg-cover"
+                                    style="background-image: url('https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=800&h=600&fit=crop');"
+                                />
                             )}
 
-                            <div class="p-4 flex flex-col gap-3 flex-1">
+                            <div class="p-4 flex flex-col flex-1">
+                                <div class="flex items-center gap-2 text-primary mb-2">
+                                    <span class="material-symbols-outlined text-lg">
+                                        flight_takeoff
+                                    </span>
+                                    <p class="text-sm font-semibold">
+                                        {itinerary.fromLocation} →{" "}
+                                        {itinerary.toLocation}
+                                    </p>
+                                </div>
+
                                 <a
                                     href={`/itinerary/${itinerary.id}`}
-                                    class="hover:text-primary"
+                                    class="text-gray-900 dark:text-white text-base font-bold leading-snug line-clamp-2 mb-3 group-hover:text-primary transition-colors hover:underline"
                                 >
-                                    <p class="text-text-light dark:text-text-dark text-base font-bold leading-normal">
-                                        {itinerary.title}
-                                    </p>
+                                    {itinerary.title}
                                 </a>
 
-                                <div class="flex items-center gap-4 text-gray-500 dark:text-gray-400 text-sm">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-lg">
-                                            calendar_today
+                                <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400 text-sm mb-3">
+                                    <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-neutral-700 px-2 py-1 rounded">
+                                        <span class="material-symbols-outlined text-base">
+                                            schedule
                                         </span>
                                         <span>{itinerary.duration}</span>
                                     </div>
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="material-symbols-outlined text-lg">
-                                            location_on
-                                        </span>
-                                        <span class="truncate">
-                                            {itinerary.location}
-                                        </span>
-                                    </div>
+                                    {itinerary.transport && (
+                                        <div class="flex items-center gap-1.5 bg-gray-100 dark:bg-neutral-700 px-2 py-1 rounded">
+                                            <span class="material-symbols-outlined text-base">
+                                                {itinerary.transport === "Car"
+                                                    ? "directions_car"
+                                                    : itinerary.transport ===
+                                                        "Train"
+                                                      ? "train"
+                                                      : itinerary.transport ===
+                                                          "Boat"
+                                                        ? "directions_boat"
+                                                        : itinerary.transport ===
+                                                            "Flight"
+                                                          ? "flight"
+                                                          : "directions_bus"}
+                                            </span>
+                                            <span>{itinerary.transport}</span>
+                                        </div>
+                                    )}
                                 </div>
 
-                                <p class="text-xs text-gray-400">
+                                <p class="text-xs text-gray-400 mb-3">
                                     Created {formatDate(itinerary.createdAt)}
                                 </p>
 
-                                <div class="flex gap-2 mt-auto pt-3 border-t border-border-light dark:border-border-dark">
+                                <div class="flex gap-2 mt-auto">
                                     <a
                                         href={`/itinerary/${itinerary.id}`}
-                                        class="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                        class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
                                     >
                                         <span class="material-symbols-outlined text-base">
                                             visibility
                                         </span>
                                         <span>View</span>
                                     </a>
+                                    <a
+                                        href={`/submit?id=${itinerary.id}`}
+                                        class="flex items-center justify-center gap-1.5 px-3 py-2 text-sm bg-gray-100 dark:bg-neutral-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors"
+                                    >
+                                        <span class="material-symbols-outlined text-base">
+                                            edit
+                                        </span>
+                                    </a>
                                     <button
-                                        class="delete-btn flex items-center justify-center p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        class="delete-btn flex items-center justify-center px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                         data-id={itinerary.id}
                                         data-title={itinerary.title}
                                     >
@@ -145,6 +174,23 @@ const formatDate = (dateStr: string | Date) => {
 </Layout>
 
 <script>
+    // Toast notification
+    function showToast(message, type = "info") {
+        const toast = document.createElement("div");
+        const colors = {
+            success: "bg-green-500",
+            error: "bg-red-500",
+            info: "bg-primary",
+        };
+        toast.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-300`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = "0";
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
     // Handle delete buttons
     document.querySelectorAll(".delete-btn").forEach((btn) => {
         btn.addEventListener("click", async (e) => {
@@ -161,10 +207,35 @@ const formatDate = (dateStr: string | Date) => {
             if (!confirmed) return;
 
             try {
-                // For now, just reload - we'll add delete endpoint later
-                alert("Delete functionality coming soon!");
+                const response = await fetch(
+                    `/api/itineraries/delete/${id}.json`,
+                    {
+                        method: "DELETE",
+                    },
+                );
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast("Itinerary deleted successfully!", "success");
+                    // Remove the card from DOM
+                    const card = button.closest(".group");
+                    if (card) {
+                        card.remove();
+                    }
+                    // If no more cards, reload to show empty state
+                    if (document.querySelectorAll(".delete-btn").length === 0) {
+                        window.location.reload();
+                    }
+                } else {
+                    showToast(
+                        result.message || "Failed to delete itinerary",
+                        "error",
+                    );
+                }
             } catch (error) {
-                alert("Failed to delete itinerary");
+                console.error("Error deleting:", error);
+                showToast("Failed to delete itinerary", "error");
             }
         });
     });

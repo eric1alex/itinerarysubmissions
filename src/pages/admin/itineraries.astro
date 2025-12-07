@@ -1,0 +1,233 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { db, Itinerary, User, eq } from "astro:db";
+
+export const prerender = false;
+
+// Get all itineraries with author info
+const allItineraries = await db
+    .select({
+        itinerary: Itinerary,
+        authorEmail: User.email,
+        authorDisplayName: User.displayName,
+    })
+    .from(Itinerary)
+    .innerJoin(User, eq(Itinerary.userId, User.id));
+
+const itinerariesWithAuthor = allItineraries
+    .map((row) => ({
+        ...row.itinerary,
+        authorName: row.authorDisplayName || row.authorEmail.split("@")[0],
+        authorEmail: row.authorEmail,
+    }))
+    .sort(
+        (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+};
+---
+
+<AdminLayout title="Itineraries">
+    <div class="space-y-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1
+                    class="text-3xl font-bold text-gray-900 dark:text-white mb-2"
+                >
+                    Itineraries
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Manage all itineraries ({itinerariesWithAuthor.length} total)
+                </p>
+            </div>
+        </div>
+
+        <div
+            class="bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden"
+        >
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-neutral-700">
+                        <tr>
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Itinerary</th
+                            >
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Author</th
+                            >
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Route</th
+                            >
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Created</th
+                            >
+                            <th
+                                class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Actions</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody
+                        class="divide-y divide-gray-200 dark:divide-neutral-700"
+                    >
+                        {
+                            itinerariesWithAuthor.map((itinerary) => (
+                                <tr
+                                    class="hover:bg-gray-50 dark:hover:bg-neutral-700/50 itinerary-row"
+                                    data-id={itinerary.id}
+                                >
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            {itinerary.coverImage ? (
+                                                <img
+                                                    src={itinerary.coverImage}
+                                                    alt=""
+                                                    class="w-12 h-12 rounded-lg object-cover"
+                                                />
+                                            ) : (
+                                                <div class="w-12 h-12 rounded-lg bg-gray-200 dark:bg-neutral-700 flex items-center justify-center">
+                                                    <span class="material-symbols-outlined text-gray-400">
+                                                        map
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div class="min-w-0">
+                                                <p class="font-medium text-gray-900 dark:text-white truncate max-w-xs">
+                                                    {itinerary.title}
+                                                </p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    {itinerary.duration}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="text-sm text-gray-900 dark:text-white">
+                                            {itinerary.authorName}
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {itinerary.authorEmail}
+                                        </p>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                                            {itinerary.fromLocation} →{" "}
+                                            {itinerary.toLocation}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                        {formatDate(itinerary.createdAt)}
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a
+                                                href={`/itinerary/${itinerary.id}`}
+                                                target="_blank"
+                                                class="p-2 text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                                                title="View"
+                                            >
+                                                <span class="material-symbols-outlined text-lg">
+                                                    visibility
+                                                </span>
+                                            </a>
+                                            <a
+                                                href={`/submit?id=${itinerary.id}`}
+                                                target="_blank"
+                                                class="p-2 text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                                                title="Edit"
+                                            >
+                                                <span class="material-symbols-outlined text-lg">
+                                                    edit
+                                                </span>
+                                            </a>
+                                            <button
+                                                class="delete-btn p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                data-id={itinerary.id}
+                                                data-title={itinerary.title}
+                                                title="Delete"
+                                            >
+                                                <span class="material-symbols-outlined text-lg">
+                                                    delete
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
+            </div>
+            {
+                itinerariesWithAuthor.length === 0 && (
+                    <p class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No itineraries found
+                    </p>
+                )
+            }
+        </div>
+    </div>
+</AdminLayout>
+
+<script>
+    function showToast(message: string, type: string = "info") {
+        const toast = document.createElement("div");
+        const colors: Record<string, string> = {
+            success: "bg-green-500",
+            error: "bg-red-500",
+            info: "bg-primary",
+        };
+        toast.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Delete functionality
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+            const button = e.currentTarget as HTMLElement;
+            const id = button.getAttribute("data-id");
+            const title = button.getAttribute("data-title");
+
+            const confirmed = confirm(
+                `Are you sure you want to delete "${title}"?`,
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/api/admin/itineraries.json`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast("Itinerary deleted successfully", "success");
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    row?.remove();
+                } else {
+                    showToast(result.message || "Failed to delete", "error");
+                }
+            } catch (error) {
+                showToast("An error occurred", "error");
+            }
+        });
+    });
+</script>

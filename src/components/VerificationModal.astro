@@ -4,8 +4,16 @@
     class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
 >
     <div
-        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full p-8 relative"
     >
+        <!-- Close button -->
+        <button
+            id="close-modal-btn"
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            title="Close"
+        >
+            <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
         <!-- Step 1: Email Input -->
         <div id="email-step" class="space-y-6">
             <div class="text-center">
@@ -96,12 +104,23 @@
                 Verify & Publish
             </button>
 
-            <button
-                id="resend-code-btn"
-                class="w-full text-sm text-gray-600 dark:text-gray-400 py-2 hover:text-primary"
-            >
-                Resend Code
-            </button>
+            <div class="flex justify-between items-center">
+                <button
+                    id="back-to-email-btn"
+                    class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1"
+                >
+                    <span class="material-symbols-outlined text-sm"
+                        >arrow_back</span
+                    >
+                    Change Email
+                </button>
+                <button
+                    id="resend-code-btn"
+                    class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary"
+                >
+                    Resend Code
+                </button>
+            </div>
         </div>
 
         <p
@@ -128,6 +147,8 @@
         const verifyCodeBtn = document.getElementById("verify-code-btn");
         const resendCodeBtn = document.getElementById("resend-code-btn");
         const cancelBtn = document.getElementById("cancel-verification-btn");
+        const closeBtn = document.getElementById("close-modal-btn");
+        const backToEmailBtn = document.getElementById("back-to-email-btn");
         const errorMsg = document.getElementById("modal-error");
 
         let currentEmail = "";
@@ -249,6 +270,15 @@
         });
 
         cancelBtn?.addEventListener("click", hideModal);
+        closeBtn?.addEventListener("click", hideModal);
+
+        // Back to email step
+        backToEmailBtn?.addEventListener("click", () => {
+            codeStep?.classList.add("hidden");
+            emailStep?.classList.remove("hidden");
+            codeInput.value = "";
+            hideError();
+        });
 
         // Allow Enter key
         emailInput?.addEventListener("keypress", (e) => {

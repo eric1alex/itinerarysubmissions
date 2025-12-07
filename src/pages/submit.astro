@@ -726,9 +726,12 @@ const editId = url.searchParams.get("id");
         id: string,
     ): Promise<Itinerary | null> {
         try {
-            const response = await fetch(`/data/itineraries/${id}.json`);
+            const response = await fetch(`/api/itineraries/${id}.json`);
             if (response.ok) {
-                return await response.json();
+                const result = await response.json();
+                if (result.success && result.itinerary) {
+                    return result.itinerary;
+                }
             }
         } catch (error) {
             console.error("Error loading itinerary:", error);

@@ -1,0 +1,188 @@
+---
+import { getAdminFromCookies } from "../lib/admin-auth";
+
+interface Props {
+    title: string;
+}
+
+const { title } = Astro.props;
+
+// Check admin authentication
+const admin = getAdminFromCookies(Astro.cookies);
+if (!admin) {
+    return Astro.redirect("/admin/login");
+}
+---
+
+<!doctype html>
+<html class="light" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="robots" content="noindex, nofollow" />
+        <title>{title} - Admin Portal</title>
+        <link rel="icon" type="image/png" href="/flag.png" />
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+            rel="stylesheet"
+        />
+        <script
+            is:inline
+            src="https://cdn.tailwindcss.com?plugins=forms,container-queries"
+        ></script>
+        <style>
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+        </style>
+        <script is:inline id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: "#3A86FF",
+                            secondary: "#FFBE0B",
+                            "background-light": "#F8F9FA",
+                            "background-dark": "#1a1a1a",
+                            "text-light": "#333333",
+                            "text-dark": "#E9ECEF",
+                            "border-light": "#E9ECEF",
+                            "border-dark": "#343a40",
+                        },
+                        fontFamily: {
+                            display: ["Plus Jakarta Sans", "sans-serif"],
+                        },
+                    },
+                },
+            };
+        </script>
+        <script is:inline>
+            (function () {
+                const theme = localStorage.getItem("theme") || "light";
+                if (theme === "dark") {
+                    document.documentElement.classList.add("dark");
+                    document.documentElement.classList.remove("light");
+                } else {
+                    document.documentElement.classList.add("light");
+                    document.documentElement.classList.remove("dark");
+                }
+            })();
+        </script>
+    </head>
+    <body
+        class="font-display bg-gray-100 dark:bg-background-dark text-text-light dark:text-text-dark"
+    >
+        <div class="flex min-h-screen">
+            <!-- Sidebar -->
+            <aside
+                class="w-64 bg-white dark:bg-neutral-800 border-r border-border-light dark:border-neutral-700 flex flex-col"
+            >
+                <div
+                    class="p-6 border-b border-border-light dark:border-neutral-700"
+                >
+                    <a href="/admin" class="flex items-center gap-3">
+                        <span
+                            class="material-symbols-outlined text-2xl text-primary"
+                            >admin_panel_settings</span
+                        >
+                        <span class="text-xl font-bold">Admin Portal</span>
+                    </a>
+                </div>
+
+                <nav class="flex-1 p-4">
+                    <ul class="space-y-2">
+                        <li>
+                            <a
+                                href="/admin"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+                            >
+                                <span class="material-symbols-outlined"
+                                    >dashboard</span
+                                >
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/admin/users"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+                            >
+                                <span class="material-symbols-outlined"
+                                    >group</span
+                                >
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a
+                                href="/admin/itineraries"
+                                class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 transition-colors"
+                            >
+                                <span class="material-symbols-outlined"
+                                    >map</span
+                                >
+                                <span>Itineraries</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div
+                    class="p-4 border-t border-border-light dark:border-neutral-700"
+                >
+                    <div class="flex items-center gap-3 px-4 py-2 mb-2">
+                        <span class="material-symbols-outlined text-gray-500"
+                            >account_circle</span
+                        >
+                        <span
+                            class="text-sm text-gray-600 dark:text-gray-400 truncate"
+                            >{admin.email}</span
+                        >
+                    </div>
+                    <button
+                        id="logout-btn"
+                        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    >
+                        <span class="material-symbols-outlined">logout</span>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-8">
+                <slot />
+            </main>
+        </div>
+
+        <script>
+            const logoutBtn = document.getElementById("logout-btn");
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", async () => {
+                    try {
+                        const response = await fetch("/api/admin/logout.json", {
+                            method: "POST",
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            window.location.href = "/admin/login";
+                        }
+                    } catch (error) {
+                        alert("Failed to logout");
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>

@@ -1,0 +1,319 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { db, User, Itinerary, eq } from "astro:db";
+
+export const prerender = false;
+
+// Get all users with their itinerary counts
+const users = await db.select().from(User);
+const itineraries = await db.select().from(Itinerary);
+
+// Create a map of user ID to itinerary count
+const itineraryCountMap = new Map<string, number>();
+itineraries.forEach((it) => {
+    const count = itineraryCountMap.get(it.userId) || 0;
+    itineraryCountMap.set(it.userId, count + 1);
+});
+
+const usersWithCounts = users
+    .map((user) => ({
+        ...user,
+        itineraryCount: itineraryCountMap.get(user.id) || 0,
+    }))
+    .sort(
+        (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+};
+---
+
+<AdminLayout title="Users">
+    <div class="space-y-6">
+        <div class="flex justify-between items-center">
+            <div>
+                <h1
+                    class="text-3xl font-bold text-gray-900 dark:text-white mb-2"
+                >
+                    Users
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Manage all registered users ({usersWithCounts.length} total)
+                </p>
+            </div>
+        </div>
+
+        <div
+            class="bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700 overflow-hidden"
+        >
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 dark:bg-neutral-700">
+                        <tr>
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >User</th
+                            >
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Itineraries</th
+                            >
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Created</th
+                            >
+                            <th
+                                class="px-6 py-4 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Last Login</th
+                            >
+                            <th
+                                class="px-6 py-4 text-right text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider"
+                                >Actions</th
+                            >
+                        </tr>
+                    </thead>
+                    <tbody
+                        class="divide-y divide-gray-200 dark:divide-neutral-700"
+                    >
+                        {
+                            usersWithCounts.map((user) => (
+                                <tr
+                                    class="hover:bg-gray-50 dark:hover:bg-neutral-700/50 user-row"
+                                    data-id={user.id}
+                                >
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <span class="material-symbols-outlined text-gray-400">
+                                                account_circle
+                                            </span>
+                                            <div>
+                                                <p
+                                                    class="font-medium text-gray-900 dark:text-white display-name"
+                                                    data-email={user.email}
+                                                >
+                                                    {user.displayName ||
+                                                        user.email.split(
+                                                            "@",
+                                                        )[0]}
+                                                </p>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                    {user.email}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                            {user.itineraryCount}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                        {formatDate(user.createdAt)}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                        {user.lastLoginAt
+                                            ? formatDate(user.lastLoginAt)
+                                            : "Never"}
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <button
+                                                class="edit-btn p-2 text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg transition-colors"
+                                                data-id={user.id}
+                                                data-name={
+                                                    user.displayName || ""
+                                                }
+                                                title="Edit"
+                                            >
+                                                <span class="material-symbols-outlined text-lg">
+                                                    edit
+                                                </span>
+                                            </button>
+                                            <button
+                                                class="delete-btn p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                data-id={user.id}
+                                                data-email={user.email}
+                                                title="Delete"
+                                            >
+                                                <span class="material-symbols-outlined text-lg">
+                                                    delete
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
+            </div>
+            {
+                usersWithCounts.length === 0 && (
+                    <p class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        No users found
+                    </p>
+                )
+            }
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div
+        id="edit-modal"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    >
+        <div
+            class="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-md w-full p-6"
+        >
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Edit User
+            </h3>
+            <input type="hidden" id="edit-user-id" />
+            <label class="block mb-4">
+                <span
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >Display Name</span
+                >
+                <input
+                    id="edit-display-name"
+                    type="text"
+                    class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="Enter display name"
+                />
+            </label>
+            <div class="flex gap-3 justify-end">
+                <button
+                    id="cancel-edit"
+                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg"
+                    >Cancel</button
+                >
+                <button
+                    id="save-edit"
+                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                    >Save</button
+                >
+            </div>
+        </div>
+    </div>
+</AdminLayout>
+
+<script>
+    function showToast(message: string, type: string = "info") {
+        const toast = document.createElement("div");
+        const colors: Record<string, string> = {
+            success: "bg-green-500",
+            error: "bg-red-500",
+            info: "bg-primary",
+        };
+        toast.className = `fixed bottom-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Edit functionality
+    const editModal = document.getElementById("edit-modal") as HTMLDivElement;
+    const editUserId = document.getElementById(
+        "edit-user-id",
+    ) as HTMLInputElement;
+    const editDisplayName = document.getElementById(
+        "edit-display-name",
+    ) as HTMLInputElement;
+    const cancelEdit = document.getElementById("cancel-edit");
+    const saveEdit = document.getElementById("save-edit");
+
+    document.querySelectorAll(".edit-btn").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+            const button = e.currentTarget as HTMLElement;
+            const id = button.getAttribute("data-id");
+            const name = button.getAttribute("data-name");
+            editUserId.value = id || "";
+            editDisplayName.value = name || "";
+            editModal.classList.remove("hidden");
+        });
+    });
+
+    cancelEdit?.addEventListener("click", () => {
+        editModal.classList.add("hidden");
+    });
+
+    saveEdit?.addEventListener("click", async () => {
+        const id = editUserId.value;
+        const displayName = editDisplayName.value.trim();
+
+        try {
+            const response = await fetch(`/api/admin/user/${id}.json`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ displayName }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast("User updated successfully", "success");
+                editModal.classList.add("hidden");
+                // Update the row
+                const row = document.querySelector(
+                    `tr[data-id="${id}"]`,
+                ) as HTMLElement;
+                if (row) {
+                    const nameEl = row.querySelector(".display-name");
+                    if (nameEl) {
+                        const email = nameEl.getAttribute("data-email") || "";
+                        nameEl.textContent = displayName || email.split("@")[0];
+                    }
+                }
+            } else {
+                showToast(result.message || "Failed to update", "error");
+            }
+        } catch (error) {
+            showToast("An error occurred", "error");
+        }
+    });
+
+    // Delete functionality
+    document.querySelectorAll(".delete-btn").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+            const button = e.currentTarget as HTMLElement;
+            const id = button.getAttribute("data-id");
+            const email = button.getAttribute("data-email");
+
+            const confirmed = confirm(
+                `Are you sure you want to delete user "${email}"? This will also delete all their itineraries.`,
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch(`/api/admin/users.json`, {
+                    method: "DELETE",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast("User deleted successfully", "success");
+                    const row = document.querySelector(`tr[data-id="${id}"]`);
+                    row?.remove();
+                } else {
+                    showToast(result.message || "Failed to delete", "error");
+                }
+            } catch (error) {
+                showToast("An error occurred", "error");
+            }
+        });
+    });
+</script>

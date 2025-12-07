@@ -1,0 +1,144 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getAdminFromCookies } from "../../lib/admin-auth";
+
+// Redirect if already logged in as admin
+const admin = getAdminFromCookies(Astro.cookies);
+if (admin) {
+    return Astro.redirect("/admin");
+}
+---
+
+<Layout title="Admin Login - Where In India">
+    <main
+        class="flex flex-1 justify-center items-center py-20 px-4 sm:px-6 lg:px-8"
+    >
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <span
+                    class="material-symbols-outlined text-5xl text-primary mb-4"
+                    >admin_panel_settings</span
+                >
+                <h1
+                    class="text-4xl font-black text-text-light dark:text-text-dark mb-2"
+                >
+                    Admin Login
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    Enter your admin credentials to continue
+                </p>
+            </div>
+
+            <div
+                class="bg-white dark:bg-gray-800/50 p-8 rounded-xl border border-border-light dark:border-border-dark"
+            >
+                <div class="space-y-4">
+                    <label class="flex flex-col w-full">
+                        <p
+                            class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
+                        >
+                            Email
+                        </p>
+                        <input
+                            id="email"
+                            type="email"
+                            required
+                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                            placeholder="admin@example.com"
+                        />
+                    </label>
+
+                    <label class="flex flex-col w-full">
+                        <p
+                            class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
+                        >
+                            Password
+                        </p>
+                        <input
+                            id="password"
+                            type="password"
+                            required
+                            class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                            placeholder="••••••••"
+                        />
+                    </label>
+                </div>
+
+                <button
+                    id="loginBtn"
+                    class="mt-6 w-full flex items-center justify-center h-12 px-6 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 transition-colors"
+                >
+                    <span>Login</span>
+                </button>
+
+                <p id="message" class="mt-4 text-sm text-center hidden"></p>
+            </div>
+
+            <p class="text-center text-sm text-gray-500 mt-6">
+                <a href="/" class="hover:text-primary">← Back to Website</a>
+            </p>
+        </div>
+    </main>
+</Layout>
+
+<script>
+    const emailInput = document.getElementById("email") as HTMLInputElement;
+    const passwordInput = document.getElementById(
+        "password",
+    ) as HTMLInputElement;
+    const loginBtn = document.getElementById("loginBtn") as HTMLButtonElement;
+    const message = document.getElementById("message") as HTMLParagraphElement;
+
+    function showError(text: string) {
+        message.textContent = text;
+        message.className = "mt-4 text-sm text-center text-red-500";
+        message.classList.remove("hidden");
+    }
+
+    loginBtn.addEventListener("click", async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+            showError("Please enter email and password");
+            return;
+        }
+
+        message.classList.add("hidden");
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = "<span>Logging in...</span>";
+
+        try {
+            const response = await fetch("/api/admin/login.json", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.href = "/admin";
+            } else {
+                showError(result.message || "Invalid credentials");
+            }
+        } catch (error) {
+            showError("An error occurred. Please try again.");
+        }
+
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "<span>Login</span>";
+    });
+
+    // Allow Enter key to submit
+    passwordInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            loginBtn.click();
+        }
+    });
+    emailInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            passwordInput.focus();
+        }
+    });
+</script>

@@ -9,7 +9,11 @@ const { id } = Astro.params;
 const currentUser = getUserFromRequest(Astro.request);
 
 const itineraries = await db
-    .select({ itinerary: Itinerary, authorEmail: User.email })
+    .select({
+        itinerary: Itinerary,
+        authorEmail: User.email,
+        authorDisplayName: User.displayName,
+    })
     .from(Itinerary)
     .innerJoin(User, eq(Itinerary.userId, User.id))
     .where(eq(Itinerary.id, id || ""));
@@ -18,8 +22,11 @@ if (itineraries.length === 0) {
     return Astro.redirect("/itineraries");
 }
 
-const { itinerary, authorEmail } = itineraries[0];
+const { itinerary, authorEmail, authorDisplayName } = itineraries[0];
 const isOwner = currentUser && currentUser.userId === itinerary.userId;
+
+// Use display name if available, otherwise use email username
+const authorName = authorDisplayName || authorEmail.split("@")[0];
 
 const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -42,9 +49,8 @@ const formatDate = (dateStr: string) => {
                             {itinerary.title}
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 text-base">
-                            By {authorEmail.split("@")[0]} | {
-                                formatDate(itinerary.startDate)
-                            } - {formatDate(itinerary.endDate)} | {
+                            By {authorName} | {formatDate(itinerary.startDate)} -
+                            {formatDate(itinerary.endDate)} | {
                                 itinerary.fromLocation
                             } → {itinerary.toLocation}
                         </p>

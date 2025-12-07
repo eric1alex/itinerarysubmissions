@@ -30,6 +30,9 @@ export const POST: APIRoute = async ({ request }) => {
             createdAt: new Date(),
         });
 
+        // Log code for local development (remove in production)
+        console.log(`\n🔑 Verification code for ${email}: ${code}\n`);
+
         // Send email
         const sent = await sendVerificationCode(email, code);
 

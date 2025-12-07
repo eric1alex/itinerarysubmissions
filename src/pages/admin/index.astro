@@ -1,0 +1,190 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { db, User, Itinerary } from "astro:db";
+
+export const prerender = false;
+
+// Get counts
+const users = await db.select().from(User);
+const itineraries = await db.select().from(Itinerary);
+
+const userCount = users.length;
+const itineraryCount = itineraries.length;
+
+// Recent activity
+const recentUsers = users
+    .sort(
+        (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5);
+
+const recentItineraries = itineraries
+    .sort(
+        (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5);
+
+const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-IN", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
+};
+---
+
+<AdminLayout title="Dashboard">
+    <div class="space-y-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Dashboard
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Overview of your application data
+            </p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-xl p-6 border border-gray-200 dark:border-neutral-700"
+            >
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
+                    >
+                        <span class="material-symbols-outlined text-blue-600"
+                            >group</span
+                        >
+                    </div>
+                    <div>
+                        <p
+                            class="text-2xl font-bold text-gray-900 dark:text-white"
+                        >
+                            {userCount}
+                        </p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">
+                            Total Users
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-xl p-6 border border-gray-200 dark:border-neutral-700"
+            >
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center"
+                    >
+                        <span class="material-symbols-outlined text-green-600"
+                            >map</span
+                        >
+                    </div>
+                    <div>
+                        <p
+                            class="text-2xl font-bold text-gray-900 dark:text-white"
+                        >
+                            {itineraryCount}
+                        </p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm">
+                            Total Itineraries
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Recent Users -->
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700"
+            >
+                <div
+                    class="p-4 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center"
+                >
+                    <h2 class="font-bold text-gray-900 dark:text-white">
+                        Recent Users
+                    </h2>
+                    <a
+                        href="/admin/users"
+                        class="text-sm text-primary hover:underline">View All</a
+                    >
+                </div>
+                <div class="divide-y divide-gray-200 dark:divide-neutral-700">
+                    {
+                        recentUsers.map((user) => (
+                            <div class="p-4 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-gray-400">
+                                    account_circle
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-gray-900 dark:text-white truncate">
+                                        {user.displayName || user.email}
+                                    </p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        {formatDate(user.createdAt)}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    }
+                    {
+                        recentUsers.length === 0 && (
+                            <p class="p-4 text-gray-500 dark:text-gray-400 text-center">
+                                No users yet
+                            </p>
+                        )
+                    }
+                </div>
+            </div>
+
+            <!-- Recent Itineraries -->
+            <div
+                class="bg-white dark:bg-neutral-800 rounded-xl border border-gray-200 dark:border-neutral-700"
+            >
+                <div
+                    class="p-4 border-b border-gray-200 dark:border-neutral-700 flex justify-between items-center"
+                >
+                    <h2 class="font-bold text-gray-900 dark:text-white">
+                        Recent Itineraries
+                    </h2>
+                    <a
+                        href="/admin/itineraries"
+                        class="text-sm text-primary hover:underline">View All</a
+                    >
+                </div>
+                <div class="divide-y divide-gray-200 dark:divide-neutral-700">
+                    {
+                        recentItineraries.map((itinerary) => (
+                            <div class="p-4 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-gray-400">
+                                    map
+                                </span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-medium text-gray-900 dark:text-white truncate">
+                                        {itinerary.title}
+                                    </p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        {itinerary.fromLocation} →{" "}
+                                        {itinerary.toLocation}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    }
+                    {
+                        recentItineraries.length === 0 && (
+                            <p class="p-4 text-gray-500 dark:text-gray-400 text-center">
+                                No itineraries yet
+                            </p>
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</AdminLayout>
