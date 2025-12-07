@@ -33,7 +33,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             .where(eq(User.id, user.userId));
 
         // Update session cookie with new display name
-        const sessionValue = createSessionValue(user.userId, user.email, trimmedName || undefined);
+        const sessionValue = await createSessionValue(user.userId, user.email, trimmedName || undefined);
         cookies.set('session', sessionValue, getSessionCookieOptions());
 
         return new Response(JSON.stringify({

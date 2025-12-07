@@ -53,7 +53,7 @@ if (!token) {
           .where(eq(VerificationCode.id, verification.id));
 
         // Create session
-        const sessionValue = createSessionValue(user.id, user.email);
+        const sessionValue = await createSessionValue(user.id, user.email);
         Astro.cookies.set("session", sessionValue, getSessionCookieOptions());
 
         success = true;

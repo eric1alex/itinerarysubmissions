@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         }
 
         // Create admin session
-        const sessionValue = createAdminSession(email);
+        const sessionValue = await createAdminSession(email);
         cookies.set('admin_session', sessionValue, getAdminSessionCookieOptions());
 
         return new Response(JSON.stringify({

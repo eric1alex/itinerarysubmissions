@@ -77,7 +77,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             .where(eq(VerificationCode.id, verification.id));
 
         // Create session with displayName
-        const sessionValue = createSessionValue(user.id, user.email, user.displayName || undefined);
+        const sessionValue = await createSessionValue(user.id, user.email, user.displayName || undefined);
         cookies.set('session', sessionValue, getSessionCookieOptions());
 
         return new Response(JSON.stringify({
