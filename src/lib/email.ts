@@ -71,7 +71,6 @@ export async function sendMagicLink(email: string, token: string, baseUrl: strin
           </head>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.5; color: #333; max-width: 400px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 24px;">
-              <img src="https://whereinindia.online/flag.png" alt="Where In India" style="height: 32px; width: auto;">
               <p style="margin: 8px 0 0; font-weight: 600; color: #333;">Where In India</p>
             </div>
             
