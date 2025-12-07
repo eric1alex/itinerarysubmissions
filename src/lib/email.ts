@@ -21,8 +21,7 @@ export async function sendVerificationCode(email: string, code: string): Promise
           </head>
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.5; color: #333; max-width: 400px; margin: 0 auto; padding: 20px;">
             <div style="text-align: center; margin-bottom: 24px;">
-              <img src="https://whereinindia.online/flag.png" alt="Where In India" style="height: 32px; width: auto;">
-              <p style="margin: 8px 0 0; font-weight: 600; color: #333;">Where In India</p>
+              <p style="margin: 0; font-weight: 600; font-size: 18px; color: #3A86FF;">Where In India</p>
             </div>
             
             <h2 style="font-size: 18px; margin: 0 0 12px; color: #333;">Verify Your Email</h2>
