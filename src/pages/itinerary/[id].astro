@@ -78,7 +78,9 @@ const formatDate = (dateStr: string) => {
                     </div>
                 </div>
 
-                <p class="text-base text-gray-600 dark:text-gray-300">
+                <p
+                    class="text-base text-gray-600 dark:text-gray-300 whitespace-pre-line"
+                >
                     {itinerary.summary}
                 </p>
 
@@ -101,7 +103,7 @@ const formatDate = (dateStr: string) => {
                                                 <h4 class="font-bold text-text-light dark:text-text-dark">
                                                     {activity.title}
                                                 </h4>
-                                                <p class="text-sm">
+                                                <p class="text-sm whitespace-pre-line">
                                                     {activity.description}
                                                 </p>
                                                 {(activity.time ||
