@@ -83,6 +83,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
                     days: data.days,
                     tags: data.tags || [],
                     coverImage: data.coverImage || null,
+                    authorName: data.authorName || null,
                     updatedAt: now,
                 })
                 .where(eq(ItineraryTable.id, data.id));
@@ -114,6 +115,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
             days: data.days,
             tags: data.tags || [],
             coverImage: data.coverImage || null,
+            authorName: data.authorName || null,
             isPublished: true,
             createdAt: now,
             updatedAt: now,

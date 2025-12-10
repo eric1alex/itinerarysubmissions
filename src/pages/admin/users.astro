@@ -49,6 +49,14 @@ const formatDate = (date: Date) => {
                     Manage all registered users ({usersWithCounts.length} total)
                 </p>
             </div>
+            <button
+                id="add-user-btn"
+                class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            >
+                <span class="material-symbols-outlined text-lg">person_add</span
+                >
+                Add User
+            </button>
         </div>
 
         <div
@@ -203,6 +211,56 @@ const formatDate = (date: Date) => {
             </div>
         </div>
     </div>
+
+    <!-- Add User Modal -->
+    <div
+        id="add-user-modal"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    >
+        <div
+            class="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-md w-full p-6"
+        >
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Add New User
+            </h3>
+            <label class="block mb-4">
+                <span
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >Email *</span
+                >
+                <input
+                    id="add-user-email"
+                    type="email"
+                    class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="user@example.com"
+                />
+            </label>
+            <label class="block mb-4">
+                <span
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >Display Name (optional)</span
+                >
+                <input
+                    id="add-user-name"
+                    type="text"
+                    class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    placeholder="John Doe"
+                />
+            </label>
+            <div class="flex gap-3 justify-end">
+                <button
+                    id="cancel-add-user"
+                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg"
+                    >Cancel</button
+                >
+                <button
+                    id="save-add-user"
+                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                    >Add User</button
+                >
+            </div>
+        </div>
+    </div>
 </AdminLayout>
 
 <script>
@@ -315,5 +373,62 @@ const formatDate = (date: Date) => {
                 showToast("An error occurred", "error");
             }
         });
+    });
+
+    // Add User functionality
+    const addUserModal = document.getElementById(
+        "add-user-modal",
+    ) as HTMLDivElement;
+    const addUserEmail = document.getElementById(
+        "add-user-email",
+    ) as HTMLInputElement;
+    const addUserName = document.getElementById(
+        "add-user-name",
+    ) as HTMLInputElement;
+    const addUserBtn = document.getElementById("add-user-btn");
+    const cancelAddUser = document.getElementById("cancel-add-user");
+    const saveAddUser = document.getElementById("save-add-user");
+
+    addUserBtn?.addEventListener("click", () => {
+        addUserEmail.value = "";
+        addUserName.value = "";
+        addUserModal.classList.remove("hidden");
+    });
+
+    cancelAddUser?.addEventListener("click", () => {
+        addUserModal.classList.add("hidden");
+    });
+
+    saveAddUser?.addEventListener("click", async () => {
+        const email = addUserEmail.value.trim();
+        const displayName = addUserName.value.trim();
+
+        if (!email) {
+            showToast("Email is required", "error");
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/admin/users.json", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email,
+                    displayName: displayName || null,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast("User added successfully!", "success");
+                addUserModal.classList.add("hidden");
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showToast(result.message || "Failed to add user", "error");
+            }
+        } catch (error) {
+            showToast("An error occurred", "error");
+        }
     });
 </script>

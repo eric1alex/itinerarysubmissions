@@ -16,10 +16,10 @@ const Itinerary = defineTable({
         userId: column.text({ references: () => User.columns.id }),
         title: column.text(),
         summary: column.text(),
-        fromLocation: column.text(),
+        fromLocation: column.text({ optional: true }),
         toLocation: column.text(),
-        startDate: column.text(),
-        endDate: column.text(),
+        startDate: column.text({ optional: true }),
+        endDate: column.text({ optional: true }),
         duration: column.text(),
         tripType: column.text({ optional: true }),
         budget: column.text({ optional: true }),
@@ -27,6 +27,7 @@ const Itinerary = defineTable({
         days: column.json(), // Array of Day objects
         tags: column.json({ optional: true }), // Array of tag strings (optional now)
         coverImage: column.text({ optional: true }), // Base64 encoded image
+        authorName: column.text({ optional: true }), // Custom author name submitted with itinerary
         isPublished: column.boolean({ default: true }),
         createdAt: column.date(),
         updatedAt: column.date(),

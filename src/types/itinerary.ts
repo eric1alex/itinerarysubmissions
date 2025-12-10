@@ -30,6 +30,7 @@ export interface Itinerary {
     tags?: string[];
     coverImage?: string;
     transport?: string;
+    authorName?: string;
     createdAt: string;
     updatedAt: string;
 }

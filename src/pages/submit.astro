@@ -62,6 +62,26 @@ const editId = url.searchParams.get("id");
                                 placeholder="Brief description of your trip..."
                             ></textarea>
                         </label>
+
+                        <label class="flex flex-col w-full">
+                            <p
+                                class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
+                            >
+                                Your Name
+                            </p>
+                            <input
+                                id="authorName"
+                                name="authorName"
+                                class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
+                                placeholder="e.g., John Doe (optional)"
+                            />
+                            <p
+                                class="mt-1 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                This name will be displayed as the itinerary
+                                author
+                            </p>
+                        </label>
                     </div>
 
                     <!-- Cover Image Upload -->
@@ -126,12 +146,11 @@ const editId = url.searchParams.get("id");
                             <p
                                 class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
                             >
-                                From *
+                                From
                             </p>
                             <input
                                 id="fromLocation"
                                 name="fromLocation"
-                                required
                                 class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                                 placeholder="e.g., Delhi"
                             />
@@ -158,13 +177,12 @@ const editId = url.searchParams.get("id");
                             <p
                                 class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
                             >
-                                Start Date *
+                                Start Date
                             </p>
                             <input
                                 id="startDate"
                                 name="startDate"
                                 type="date"
-                                required
                                 class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                             />
                         </label>
@@ -172,13 +190,12 @@ const editId = url.searchParams.get("id");
                             <p
                                 class="text-gray-900 dark:text-white text-base font-medium leading-normal pb-2"
                             >
-                                End Date *
+                                End Date
                             </p>
                             <input
                                 id="endDate"
                                 name="endDate"
                                 type="date"
-                                required
                                 class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-gray-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-neutral-600 bg-white dark:bg-neutral-800 h-14 placeholder:text-gray-500 dark:placeholder:text-gray-400 p-[15px] text-base font-normal leading-normal"
                             />
                         </label>
@@ -600,6 +617,7 @@ const editId = url.searchParams.get("id");
         return {
             title: formData.get("title"),
             summary: formData.get("summary"),
+            authorName: formData.get("authorName"),
             fromLocation: formData.get("fromLocation"),
             toLocation: formData.get("toLocation"),
             startDate: formData.get("startDate"),
@@ -642,6 +660,7 @@ const editId = url.searchParams.get("id");
                 duration: formData.duration as string,
                 budget: (formData.budget as string) || "",
                 transport: (formData.transport as string) || "",
+                authorName: (formData.authorName as string) || "",
                 days: days,
                 coverImage: coverImageBase64 || undefined,
                 createdAt: editingId
@@ -774,6 +793,9 @@ const editId = url.searchParams.get("id");
                 (
                     document.getElementById("transport") as HTMLInputElement
                 ).value = existing.transport || "";
+                (
+                    document.getElementById("authorName") as HTMLInputElement
+                ).value = existing.authorName || "";
 
                 days = existing.days;
 
@@ -828,6 +850,9 @@ const editId = url.searchParams.get("id");
                 (
                     document.getElementById("transport") as HTMLInputElement
                 ).value = draftData.transport || "";
+                (
+                    document.getElementById("authorName") as HTMLInputElement
+                ).value = draftData.authorName || "";
 
                 days = draftData.days || [];
 

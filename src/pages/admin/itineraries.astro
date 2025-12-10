@@ -47,6 +47,23 @@ const formatDate = (date: Date) => {
                     Manage all itineraries ({itinerariesWithAuthor.length} total)
                 </p>
             </div>
+            <div class="flex gap-3">
+                <input
+                    type="file"
+                    id="json-upload"
+                    accept=".json"
+                    class="hidden"
+                />
+                <button
+                    id="upload-btn"
+                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                    <span class="material-symbols-outlined text-lg"
+                        >upload_file</span
+                    >
+                    Upload JSON
+                </button>
+            </div>
         </div>
 
         <div
@@ -178,6 +195,44 @@ const formatDate = (date: Date) => {
             }
         </div>
     </div>
+
+    <!-- User Selection Modal for Upload -->
+    <div
+        id="user-select-modal"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+    >
+        <div
+            class="bg-white dark:bg-neutral-800 rounded-xl shadow-xl max-w-md w-full p-6"
+        >
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                Assign Itinerary to User
+            </h3>
+            <label class="block mb-4">
+                <span
+                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >Select User *</span
+                >
+                <select
+                    id="user-select"
+                    class="mt-1 w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                    <option value="">Loading users...</option>
+                </select>
+            </label>
+            <div class="flex gap-3 justify-end">
+                <button
+                    id="cancel-upload"
+                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg"
+                    >Cancel</button
+                >
+                <button
+                    id="confirm-upload"
+                    class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+                    >Upload</button
+                >
+            </div>
+        </div>
+    </div>
 </AdminLayout>
 
 <script>
@@ -229,5 +284,105 @@ const formatDate = (date: Date) => {
                 showToast("An error occurred", "error");
             }
         });
+    });
+
+    // JSON Upload functionality
+    const uploadBtn = document.getElementById("upload-btn");
+    const jsonUpload = document.getElementById(
+        "json-upload",
+    ) as HTMLInputElement;
+    const userSelectModal = document.getElementById(
+        "user-select-modal",
+    ) as HTMLDivElement;
+    const userSelect = document.getElementById(
+        "user-select",
+    ) as HTMLSelectElement;
+    const cancelUpload = document.getElementById("cancel-upload");
+    const confirmUpload = document.getElementById("confirm-upload");
+    let pendingUploadData: any = null;
+
+    uploadBtn?.addEventListener("click", () => {
+        jsonUpload?.click();
+    });
+
+    jsonUpload?.addEventListener("change", async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            pendingUploadData = JSON.parse(text);
+
+            // Fetch users and show selection modal
+            const usersRes = await fetch("/api/admin/users.json");
+            const usersData = await usersRes.json();
+
+            if (usersData.success && usersData.users.length > 0) {
+                userSelect.innerHTML = usersData.users
+                    .map(
+                        (user: any) =>
+                            `<option value="${user.id}">${user.displayName || user.email.split("@")[0]} (${user.email})</option>`,
+                    )
+                    .join("");
+                userSelectModal.classList.remove("hidden");
+            } else {
+                showToast("No users found. Please add a user first.", "error");
+                pendingUploadData = null;
+            }
+        } catch (error) {
+            if (error instanceof SyntaxError) {
+                showToast("Invalid JSON file", "error");
+            } else {
+                showToast("An error occurred while reading file", "error");
+            }
+            pendingUploadData = null;
+        }
+
+        // Reset input
+        jsonUpload.value = "";
+    });
+
+    cancelUpload?.addEventListener("click", () => {
+        userSelectModal.classList.add("hidden");
+        pendingUploadData = null;
+    });
+
+    confirmUpload?.addEventListener("click", async () => {
+        const selectedUserId = userSelect.value;
+        if (!selectedUserId) {
+            showToast("Please select a user", "error");
+            return;
+        }
+
+        if (!pendingUploadData) {
+            showToast("No data to upload", "error");
+            return;
+        }
+
+        try {
+            showToast("Uploading itinerary...", "info");
+
+            const response = await fetch("/api/admin/upload-itinerary.json", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...pendingUploadData,
+                    userId: selectedUserId,
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                showToast("Itinerary created successfully!", "success");
+                userSelectModal.classList.add("hidden");
+                pendingUploadData = null;
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                showToast(result.message || "Failed to upload", "error");
+            }
+        } catch (error) {
+            showToast("An error occurred while uploading", "error");
+        }
     });
 </script>

@@ -65,3 +65,56 @@ export const DELETE: APIRoute = async ({ request, cookies }) => {
         }), { status: 500 });
     }
 };
+
+// POST: Create a new user (admin only, no OTP)
+export const POST: APIRoute = async ({ request, cookies }) => {
+    if (!isAdminAuthenticated(cookies)) {
+        return new Response(JSON.stringify({
+            success: false,
+            message: 'Unauthorized'
+        }), { status: 401 });
+    }
+
+    try {
+        const { email, displayName } = await request.json();
+
+        if (!email) {
+            return new Response(JSON.stringify({
+                success: false,
+                message: 'Email is required'
+            }), { status: 400 });
+        }
+
+        // Check if user already exists
+        const existingUsers = await db.select().from(User).where(eq(User.email, email));
+        if (existingUsers.length > 0) {
+            return new Response(JSON.stringify({
+                success: false,
+                message: 'User with this email already exists'
+            }), { status: 400 });
+        }
+
+        const now = new Date();
+        const userId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+        await db.insert(User).values({
+            id: userId,
+            email: email.toLowerCase().trim(),
+            displayName: displayName || null,
+            createdAt: now,
+            lastLoginAt: null,
+        });
+
+        return new Response(JSON.stringify({
+            success: true,
+            message: 'User created successfully',
+            id: userId
+        }), { status: 200 });
+    } catch (error) {
+        console.error('Error creating user:', error);
+        return new Response(JSON.stringify({
+            success: false,
+            message: 'Failed to create user'
+        }), { status: 500 });
+    }
+};

@@ -25,8 +25,9 @@ if (itineraries.length === 0) {
 const { itinerary, authorEmail, authorDisplayName } = itineraries[0];
 const isOwner = currentUser && currentUser.userId === itinerary.userId;
 
-// Use display name if available, otherwise use email username
-const authorName = authorDisplayName || authorEmail.split("@")[0];
+// Use submitted author name if available, otherwise display name, otherwise email username
+const authorName =
+    itinerary.authorName || authorDisplayName || authorEmail.split("@")[0];
 
 const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-IN", {

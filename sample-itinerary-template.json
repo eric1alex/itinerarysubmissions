@@ -1,0 +1,68 @@
+{
+    "title": "Delhi to Jaipur Road Trip",
+    "summary": "A wonderful 3-day journey exploring Rajasthan's pink city, starting from the capital Delhi. Experience the rich culture, magnificent forts, and delicious cuisine.",
+    "toLocation": "Jaipur, Rajasthan",
+    "fromLocation": "Delhi",
+    "duration": "3 days",
+    "startDate": "2024-12-15",
+    "endDate": "2024-12-17",
+    "budget": "₹15,000",
+    "transport": "Car",
+    "authorName": "Your Name",
+    "days": [
+        {
+            "dayNumber": 1,
+            "title": "Arrival in Jaipur",
+            "activities": [
+                {
+                    "title": "Visit Amber Fort",
+                    "description": "Explore the magnificent Amber Fort with its stunning architecture and panoramic views of the city",
+                    "time": "10:00 AM",
+                    "address": "Amber Fort, Jaipur"
+                },
+                {
+                    "title": "Lunch at Chokhi Dhani",
+                    "description": "Enjoy traditional Rajasthani thali at this ethnic village resort",
+                    "time": "1:00 PM",
+                    "address": "Chokhi Dhani, Tonk Road, Jaipur"
+                }
+            ]
+        },
+        {
+            "dayNumber": 2,
+            "title": "City Exploration",
+            "activities": [
+                {
+                    "title": "Hawa Mahal Visit",
+                    "description": "Visit the iconic Palace of Winds, known for its unique honeycomb structure",
+                    "time": "9:00 AM",
+                    "address": "Hawa Mahal, Badi Choupad, Jaipur"
+                },
+                {
+                    "title": "City Palace Tour",
+                    "description": "Explore the royal residence and museum showcasing Jaipur's rich history",
+                    "time": "11:00 AM",
+                    "address": "City Palace, Old City, Jaipur"
+                }
+            ]
+        },
+        {
+            "dayNumber": 3,
+            "title": "Shopping and Departure",
+            "activities": [
+                {
+                    "title": "Shopping at Johari Bazaar",
+                    "description": "Pick up traditional jewelry, textiles, and souvenirs",
+                    "time": "10:00 AM",
+                    "address": "Johari Bazaar, Jaipur"
+                },
+                {
+                    "title": "Departure",
+                    "description": "Head back to Delhi with wonderful memories",
+                    "time": "4:00 PM",
+                    "address": "NH48, Jaipur to Delhi"
+                }
+            ]
+        }
+    ]
+}
